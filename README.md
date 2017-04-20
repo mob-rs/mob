@@ -1,7 +1,6 @@
 # Mob
 
-[![Build Status](https://travis-ci.org/mikeastock/mob.svg?branch=master)]
-(https://travis-ci.org/mikeastock/mob)
+[![Build Status](https://travis-ci.org/mikeastock/mob.svg?branch=master)](https://travis-ci.org/mikeastock/mob)
 
 A CLI for mobbing from the comfort of your console.
 
