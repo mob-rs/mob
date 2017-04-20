@@ -1,35 +1,35 @@
 #![deny(warnings)]
 
 extern crate clap;
+extern crate rand;
 
 pub mod cli;
 pub mod error;
+pub mod team;
+pub mod timer;
 pub mod tmux;
 
 use clap::ArgMatches;
 use std::error::Error as StdError;
 use std::process::exit;
-use std::thread::sleep;
-use std::time::Duration;
+use team::{Member,Team};
 
 type Result<T> = std::result::Result<T, error::Error>;
 
 pub fn run(matches: ArgMatches) -> Result<()> {
-    let mut elapsed_time = 0;
+    let mut team = match matches.value_of("members") {
+        Some(members_string) => {
+            let members: Vec<Member> = members_string
+                .split(",")
+                .map(|string| string.to_owned() as Member)
+                .collect();
 
-    let names = matches.value_of("names");
+            Team::new(members)
+        }
+        None => exit(1),
+    };
 
-    loop {
-        if elapsed_time == 3 {
-            tmux::flash_background()?;
-        };
-
-        println!("{:?}", names);
-        println!("{:?}", elapsed_time);
-
-        elapsed_time += 1;
-        sleep(Duration::new(1, 0));
-    }
+    timer::run(&mut team)
 }
 
 pub fn handle_error<E: StdError, T>(error: E) -> T {
