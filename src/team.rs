@@ -44,3 +44,34 @@ impl Team {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::{Member,Team};
+
+    #[test]
+    fn test_new() {
+        let members: Vec<Member> = vec![
+            "Mike".into(),
+            "Brian".into(),
+            "Patrick".into()];
+
+        let team = Team::new(members.clone());
+
+        assert_eq!(team.driver, team.members[0]);
+    }
+
+    #[test]
+    fn test_next_driver() {
+        let members: Vec<Member> = vec![
+            "Mike".into(),
+            "Brian".into(),
+            "Patrick".into()];
+
+        let mut team = Team::new(members.clone());
+
+        team.next_driver();
+
+        assert_eq!(team.driver, team.members[1]);
+    }
+}
