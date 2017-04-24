@@ -29,7 +29,7 @@ mob <members>
 
 Where members is a comma separated list of users in the mob.
 
-### Options
+#### Options
 
 You can specify the amount of time for driving:
 
