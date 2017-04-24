@@ -29,10 +29,17 @@ mob <members>
 
 Where members is a comma separated list of users in the mob.
 
+### Options
+
+You can specify the amount of time for driving:
+
+```bash
+mob Mike,Zack,Ed --minutes 3
+```
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/mikeastock/mob.
 This project is intended to be a safe, welcoming space for collaboration, and
 contributors are expected to adhere to the
 [Contributor Covenant](contributor-covenant.org) code of conduct.
-
