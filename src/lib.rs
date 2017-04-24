@@ -19,8 +19,8 @@ type Result<T> = std::result::Result<T, error::Error>;
 pub fn run(matches: ArgMatches) -> Result<()> {
     let time_per_driver_in_minutes = matches
         .value_of("minutes")
-        .map(|minutes| minutes.parse::<i64>())
-        .unwrap_or(Ok(5))?;
+        .map(|minutes| minutes.parse::<f64>())
+        .unwrap_or(Ok(5.0))?;
 
     let mut team = match matches.value_of("members") {
         Some(members_string) => {

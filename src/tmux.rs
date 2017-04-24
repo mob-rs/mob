@@ -48,6 +48,14 @@ fn set_background(pane: &Pane, color: &str) -> Result<ExitStatus> {
         .map_err(|error| Error::Io(error))
 }
 
+pub fn send_message(message: String) -> Result<ExitStatus> {
+    Command::new("tmux")
+        .arg("display-message")
+        .arg(format!("'{}'", message))
+        .status()
+        .map_err(|error| Error::Io(error))
+}
+
 fn list_panes() -> Result<Vec<Pane>> {
     let output = Command::new("tmux").arg("list-panes").arg("-a").output()?;
     let raw = String::from_utf8(output.stdout)?;
