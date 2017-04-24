@@ -2,11 +2,13 @@ use std::error::Error as StdError;
 use std::fmt;
 use std::io::Error as IoError;
 use std::string::FromUtf8Error;
+use std::num::ParseIntError;
 
 #[derive(Debug)]
 pub enum Error {
     FromUtf8(FromUtf8Error),
     Io(IoError),
+    ParseInt(ParseIntError),
 }
 
 use self::Error::*;
@@ -16,6 +18,7 @@ impl StdError for Error {
         match *self {
             FromUtf8(ref from_utf8_error) => from_utf8_error.description(),
             Io(ref io_error) => io_error.description(),
+            ParseInt(ref parse_int_error) => parse_int_error.description(),
         }
     }
 }
@@ -35,5 +38,11 @@ impl From<IoError> for Error {
 impl From<FromUtf8Error> for Error {
     fn from(error: FromUtf8Error) -> Error {
         FromUtf8(error)
+    }
+}
+
+impl From<ParseIntError> for Error {
+    fn from(error: ParseIntError) -> Error {
+        ParseInt(error)
     }
 }

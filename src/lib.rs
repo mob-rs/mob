@@ -17,6 +17,11 @@ use team::{Member,Team};
 type Result<T> = std::result::Result<T, error::Error>;
 
 pub fn run(matches: ArgMatches) -> Result<()> {
+    let time_per_driver_in_minutes = matches
+        .value_of("minutes")
+        .map(|minutes| minutes.parse::<i64>())
+        .unwrap_or(Ok(5))?;
+
     let mut team = match matches.value_of("members") {
         Some(members_string) => {
             let members: Vec<Member> = members_string
@@ -29,7 +34,7 @@ pub fn run(matches: ArgMatches) -> Result<()> {
         None => exit(1),
     };
 
-    timer::run(&mut team)
+    timer::run(&time_per_driver_in_minutes, &mut team)
 }
 
 pub fn handle_error<E: StdError, T>(error: E) -> T {

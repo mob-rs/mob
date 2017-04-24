@@ -4,23 +4,25 @@ use super::Result;
 use team::Team;
 use tmux;
 
-pub fn run(team: &mut Team) -> Result<()> {
+pub fn run(time_per_driver_in_minutes: &i64, team: &mut Team) -> Result<()> {
+    let time_per_driver_in_seconds = time_per_driver_in_minutes * 60;
+
     let mut elapsed_time = 0;
 
     loop {
-        if timer_is_done(elapsed_time) {
+        if is_time_for_next_driver(&time_per_driver_in_seconds, elapsed_time) {
             tmux::flash_background()?;
             team.next_driver();
         };
 
         println!("{}", team.driver);
         elapsed_time += 1;
-        sleep(Duration::new(1, 0));
+        sleep(Duration::from_secs(1))
     }
 }
 
-fn timer_is_done(elapsed_time: i64) -> bool {
-    if elapsed_time != 0 && elapsed_time % 3 == 0 {
+fn is_time_for_next_driver(time_per_driver: &i64, elapsed_time: i64) -> bool {
+    if elapsed_time != 0 && elapsed_time % time_per_driver == 0 {
         true
     } else {
         false

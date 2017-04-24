@@ -7,4 +7,9 @@ pub fn build_cli() -> App<'static, 'static> {
              .help("Names for mob")
              .index(1)
              .required(true))
+        .arg(Arg::with_name("minutes")
+             .help("Amount of time per driver")
+             .takes_value(true)
+             .long("minutes")
+             .short("m"))
 }
