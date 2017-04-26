@@ -20,12 +20,12 @@ impl Team {
             .clone();
 
         Team {
-            members: randomized_members.clone(),
+            members: randomized_members,
             driver: first_driver,
         }
     }
 
-    pub fn next_driver(self: &mut Team) {
+    pub fn next_driver(&mut self) {
         let current_driver_index = self
             .members
             .iter()

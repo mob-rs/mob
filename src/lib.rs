@@ -26,8 +26,8 @@ pub fn run(matches: ArgMatches) -> Result<()> {
         Some(members_string) => {
             let members: Vec<Member> = members_string
                 .split(",")
-                .map(|string| string.to_owned() as Member)
-                .collect();
+                .map(|string| string.to_owned())
+                .collect::<Vec<Member>>();
 
             Team::new(members)
         }
