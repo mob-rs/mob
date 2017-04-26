@@ -1,9 +1,11 @@
+use std::fs::File;
+use std::io::Read;
+use std::process::exit;
 use std::thread::sleep;
 use std::time::Duration;
 use super::Result;
 use team::Team;
 use tmux;
-use std::process::exit;
 
 pub fn run(time_per_driver_in_minutes: &f64, team: &mut Team) -> Result<()> {
     let time_per_driver_in_seconds = time_per_driver_in_minutes * 60.0;
@@ -22,11 +24,15 @@ pub fn run(time_per_driver_in_minutes: &f64, team: &mut Team) -> Result<()> {
 }
 
 fn prompt_user(team: &mut Team) -> Result<()> {
-    let prompt_command = "sleep 1; echo continue > /tmp/mob";
+    let prompt_command = r#"
+    echo 'Continue mobbing? [y/n]' && \
+        read input && \
+        echo $input > /tmp/mob
+    "#;
 
     let exit_status = tmux::new_window_with_command(prompt_command)?;
 
-    if exit_status.success() && is_continue() {
+    if exit_status.success() && is_continue()? {
         team.next_driver();
         Ok(())
     } else {
@@ -34,8 +40,12 @@ fn prompt_user(team: &mut Team) -> Result<()> {
     }
 }
 
-fn is_continue() -> bool {
-    true
+fn is_continue() -> Result<bool> {
+    let mut file = File::open("/tmp/mob")?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+
+    Ok(contents.trim().to_lowercase() == "y")
 }
 
 fn is_time_for_next_driver(time_per_driver: &f64, elapsed_time: f64) -> bool {
