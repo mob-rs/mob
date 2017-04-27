@@ -17,7 +17,6 @@ pub fn run(time_per_driver_in_minutes: &f64, team: &mut Team) -> Result<()> {
             prompt_user(team)?;
         };
 
-        println!("{}", team.driver);
         elapsed_time += 1.0;
         sleep(Duration::from_secs(1))
     }
