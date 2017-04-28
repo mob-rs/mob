@@ -5,6 +5,7 @@ extern crate rand;
 
 pub mod cli;
 pub mod error;
+pub mod prompt;
 pub mod team;
 pub mod timer;
 pub mod tmux;
@@ -17,6 +18,14 @@ use team::{Member,Team};
 type Result<T> = std::result::Result<T, error::Error>;
 
 pub fn run(matches: ArgMatches) -> Result<()> {
+    match matches.subcommand() {
+        ("prompt", Some(subcommand_matches)) => prompt::run(subcommand_matches),
+        (_, Some(subcommand_matches)) => timer(subcommand_matches),
+        _ => unreachable!("The cli parser should prevent reaching here"),
+    }
+}
+
+fn timer(matches: &ArgMatches) -> Result<()> {
     let time_per_driver_in_minutes = matches
         .value_of("minutes")
         .map(|minutes| minutes.parse::<f64>())
