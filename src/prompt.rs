@@ -20,9 +20,9 @@ pub fn run(matches: &ArgMatches) -> Result<()> {
 fn print_next_driver(matches: &ArgMatches) {
     let next_driver = matches.value_of("next_driver").expect("Next Driver");
     println!("Next Driver is: {red}{next_driver}{reset}",
-        red = color::Fg(color::Red),
-        next_driver = next_driver,
-        reset = color::Fg(color::Reset));
+             red = color::Fg(color::Red),
+             next_driver = next_driver,
+             reset = color::Fg(color::Reset));
 }
 
 fn print_continue() -> Result<()> {

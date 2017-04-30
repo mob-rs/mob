@@ -1,5 +1,5 @@
 use error::Error;
-use std::process::{Command,ExitStatus};
+use std::process::{Command, ExitStatus};
 use super::Result;
 
 // Open new window

@@ -14,7 +14,7 @@ pub mod tmux;
 use clap::ArgMatches;
 use std::error::Error as StdError;
 use std::process::exit;
-use team::{Member,Team};
+use team::{Member, Team};
 
 type Result<T> = std::result::Result<T, error::Error>;
 
@@ -26,15 +26,13 @@ pub fn run(matches: ArgMatches) -> Result<()> {
 }
 
 fn timer(matches: &ArgMatches) -> Result<()> {
-    let time_per_driver_in_minutes = matches
-        .value_of("minutes")
+    let time_per_driver_in_minutes = matches.value_of("minutes")
         .map(|minutes| minutes.parse::<f64>())
         .unwrap_or(Ok(5.0))?;
 
     let mut team = match matches.value_of("members") {
         Some(members_string) => {
-            let members: Vec<Member> = members_string
-                .split(",")
+            let members: Vec<Member> = members_string.split(",")
                 .map(|string| string.to_owned())
                 .collect::<Vec<Member>>();
 

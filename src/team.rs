@@ -14,8 +14,7 @@ impl Team {
         let mut rng = thread_rng();
         rng.shuffle(&mut randomized_members);
 
-        let first_driver = randomized_members
-            .first()
+        let first_driver = randomized_members.first()
             .expect("At least one member")
             .clone();
 
@@ -26,8 +25,7 @@ impl Team {
     }
 
     pub fn next_driver(&self) -> Member {
-        let current_driver_index = self
-            .members
+        let current_driver_index = self.members
             .iter()
             .position(|ref member| member == &&self.driver)
             .expect("Valid index for current driver");
@@ -51,14 +49,11 @@ impl Team {
 
 #[cfg(test)]
 mod test {
-    use super::{Member,Team};
+    use super::{Member, Team};
 
     #[test]
     fn test_new() {
-        let members: Vec<Member> = vec![
-            "Mike".into(),
-            "Brian".into(),
-            "Patrick".into()];
+        let members: Vec<Member> = vec!["Mike".into(), "Brian".into(), "Patrick".into()];
 
         let team = Team::new(members.clone());
 
@@ -67,10 +62,7 @@ mod test {
 
     #[test]
     fn test_next_driver() {
-        let members: Vec<Member> = vec![
-            "Mike".into(),
-            "Brian".into(),
-            "Patrick".into()];
+        let members: Vec<Member> = vec!["Mike".into(), "Brian".into(), "Patrick".into()];
 
         let team = Team::new(members.clone());
 
@@ -79,10 +71,7 @@ mod test {
 
     #[test]
     fn test_change_driver() {
-        let members: Vec<Member> = vec![
-            "Mike".into(),
-            "Brian".into(),
-            "Patrick".into()];
+        let members: Vec<Member> = vec!["Mike".into(), "Brian".into(), "Patrick".into()];
 
         let mut team = Team::new(members.clone());
 

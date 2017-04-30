@@ -1,5 +1,5 @@
 use std::env::current_exe;
-use std::fs::{File,remove_file};
+use std::fs::{File, remove_file};
 use std::io::Read;
 use std::path::Path;
 use std::process::exit;
