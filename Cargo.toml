@@ -2,6 +2,7 @@
 name = "mob"
 version = "0.1.0"
 authors = ["Michael Stock <mikeastock@gmail.com>"]
+license = "MIT"
 description = "A CLI for mobbing from the comfort of your console"
 documentation = "https://github.com/mikeastock/mob"
 homepage = "https://github.com/mikeastock/mob"
