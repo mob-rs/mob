@@ -20,8 +20,7 @@ type Result<T> = std::result::Result<T, error::Error>;
 pub fn run(matches: ArgMatches) -> Result<()> {
     match matches.subcommand() {
         ("prompt", Some(subcommand_matches)) => prompt::run(subcommand_matches),
-        (_, Some(subcommand_matches)) => timer(subcommand_matches),
-        _ => unreachable!("The cli parser should prevent reaching here"),
+        _ => timer(&matches),
     }
 }
 

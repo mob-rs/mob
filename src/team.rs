@@ -25,7 +25,7 @@ impl Team {
         }
     }
 
-    pub fn next_driver(&mut self) {
+    pub fn next_driver(&self) -> Member {
         let current_driver_index = self
             .members
             .iter()
@@ -35,13 +35,17 @@ impl Team {
         let next_driver_index = current_driver_index + 1;
 
         if next_driver_index == self.members.len() {
-            self.driver = self.members
+            self.members
                 .first()
                 .expect("At least one member")
-                .clone();
+                .clone()
         } else {
-            self.driver = self.members[next_driver_index].clone();
+            self.members[next_driver_index].clone()
         }
+    }
+
+    pub fn change_driver(&mut self, next_driver: &Member) {
+        self.driver = next_driver.to_owned()
     }
 }
 
@@ -68,10 +72,23 @@ mod test {
             "Brian".into(),
             "Patrick".into()];
 
+        let team = Team::new(members.clone());
+
+        assert_eq!(team.next_driver(), team.members[1]);
+    }
+
+    #[test]
+    fn test_change_driver() {
+        let members: Vec<Member> = vec![
+            "Mike".into(),
+            "Brian".into(),
+            "Patrick".into()];
+
         let mut team = Team::new(members.clone());
 
-        team.next_driver();
+        let next_driver = team.next_driver();
+        team.change_driver(&next_driver);
 
-        assert_eq!(team.driver, team.members[1]);
+        assert_eq!(next_driver, team.driver);
     }
 }
