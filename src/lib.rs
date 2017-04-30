@@ -2,6 +2,7 @@
 
 extern crate clap;
 extern crate rand;
+extern crate termion;
 
 pub mod cli;
 pub mod error;
