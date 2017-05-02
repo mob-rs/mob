@@ -36,7 +36,7 @@ fn prompt_user(team: &mut Team) -> Result<()> {
     wait_for_file();
 
     if exit_status.success() && is_continue()? {
-        team.next_driver();
+        team.change_driver(&next_driver);
         Ok(())
     } else {
         exit(1);
