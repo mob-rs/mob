@@ -1,11 +1,16 @@
 // #![deny(warnings)]
 
+#![feature(plugin)]
+#![plugin(rocket_codegen)]
+
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_codegen;
 extern crate dotenv;
+extern crate rocket;
 
 // pub mod models;
 // pub mod schema;
+pub mod web;
 
 use diesel::prelude::*;
 use diesel::sqlite::SqliteConnection;

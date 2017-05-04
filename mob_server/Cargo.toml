@@ -14,3 +14,6 @@ diesel_codegen = { version = "0.12.0", features = ["sqlite"] }
 dotenv = "0.8"
 rocket = "0.2.6"
 rocket_codegen = "0.2.6"
+
+[dev-dependencies]
+rocket = { version = "0.2.6", features = ["testing"] }
