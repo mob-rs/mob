@@ -1,32 +1,37 @@
-use rocket_contrib::{JSON, Value};
 use models::NewTeam;
+use rocket::Route;
+use rocket_contrib::{JSON, Value};
 
 #[get("/", format = "application/json")]
-fn hello() -> JSON<Value> {
+fn index() -> JSON<Value> {
     JSON(json!({
         "message": "Hello World!",
     }))
 }
 
-#[post("/teams", format = "application/json", data = "<team>")]
-fn create_team(team: JSON<NewTeam>) -> JSON<Value> {
+#[post("/", format = "application/json", data = "<team>")]
+fn create(team: JSON<NewTeam>) -> JSON<Value> {
     println!("{:?}", team);
     JSON(json!({ "message": "created" }))
 }
 
+pub fn routes() -> Vec<Route> {
+    routes![index, create]
+}
+
 #[cfg(test)]
 mod test {
-    use rocket;
-    use rocket::testing::MockRequest;
-    use rocket::http::{ContentType, Status};
     use rocket::http::Method::*;
+    use rocket::http::{ContentType, Status};
+    use rocket::testing::MockRequest;
+    use web::app;
 
     #[test]
-    fn test_hello() {
-        let rocket = rocket::ignite().mount("/", routes![super::hello]);
+    fn test_index() {
+        let app = app();
 
-        let mut req = MockRequest::new(Get, "/").header(ContentType::JSON);
-        let mut response = req.dispatch_with(&rocket);
+        let mut req = MockRequest::new(Get, "/teams").header(ContentType::JSON);
+        let mut response = req.dispatch_with(&app);
 
         assert_eq!(response.status(), Status::Ok);
 
@@ -35,14 +40,14 @@ mod test {
     }
 
     #[test]
-    fn test_create_team() {
-        let rocket = rocket::ignite().mount("/", routes![super::create_team]);
+    fn test_create() {
+        let app = app();
 
         let mut req = MockRequest::new(Post, "/teams")
             .header(ContentType::JSON)
             .body(r#"{ "driver_id": 1 }"#);
 
-        let mut response = req.dispatch_with(&rocket);
+        let mut response = req.dispatch_with(&app);
 
         assert_eq!(response.status(), Status::Ok);
         let body = response.body().unwrap().into_string().unwrap();
