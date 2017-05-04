@@ -1,0 +1,14 @@
+[package]
+name = "mob_cli"
+version = "0.1.2"
+authors = ["Michael Stock <mikeastock@gmail.com>"]
+license = "MIT"
+description = "A CLI for mobbing from the comfort of your console"
+documentation = "https://github.com/mikeastock/mob"
+homepage = "https://github.com/mikeastock/mob"
+repository = "https://github.com/mikeastock/mob"
+
+[dependencies]
+clap = "2.23"
+rand = "0.3"
+termion = "1.3"
