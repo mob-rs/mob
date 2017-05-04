@@ -1,6 +1,12 @@
-use schema::*;
+use diesel::prelude::*;
+use diesel::sqlite::SqliteConnection;
 
-#[derive(Queryable, Debug)]
+use error::Error;
+use schema::teams::dsl::{teams as all_teams};
+use schema::teams;
+use super::Result;
+
+#[derive(Queryable, Serialize, Debug)]
 pub struct Team {
     pub id: i32,
     pub driver_id: i32,
@@ -26,7 +32,12 @@ pub struct Member {
 //     }
 // }
 
-// impl Team {
+impl Team {
+    pub fn all(conn: &SqliteConnection) -> Result<Vec<Team>> {
+        all_teams.load(conn).map_err(|error| Error::Diesel(error))
+    }
+}
+
 //     pub fn next_driver(&self) -> Member {
 //         let current_driver_index = self.members
 //             .iter()

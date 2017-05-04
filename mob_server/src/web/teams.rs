@@ -1,12 +1,15 @@
-use models::NewTeam;
+use db::Conn;
+use models::{NewTeam, Team};
+use Result;
+
 use rocket::Route;
 use rocket_contrib::{JSON, Value};
 
 #[get("/", format = "application/json")]
-fn index() -> JSON<Value> {
-    JSON(json!({
-        "message": "Hello World!",
-    }))
+fn index(conn: Conn) -> Result<JSON<Vec<Team>>> {
+    let teams = Team::all(&conn)?;
+
+    Ok(JSON(teams))
 }
 
 #[post("/", format = "application/json", data = "<team>")]
