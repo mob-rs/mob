@@ -12,3 +12,5 @@ repository = "https://github.com/mob-rs/mob"
 diesel = { version = "0.12.0", features = ["sqlite"] }
 diesel_codegen = { version = "0.12.0", features = ["sqlite"] }
 dotenv = "0.8"
+rocket = "0.2.6"
+rocket_codegen = "0.2.6"
