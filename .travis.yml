@@ -4,6 +4,10 @@ rust:
   - stable
   - beta
   - nightly
+script:
+  - |
+    cargo build --all &&
+    cargo test --all
 notifications:
   email:
     on_success: never
