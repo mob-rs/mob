@@ -8,11 +8,12 @@
 extern crate dotenv;
 extern crate rocket;
 #[macro_use] extern crate rocket_contrib;
+extern crate serde;
 extern crate serde_json;
 #[macro_use] extern crate serde_derive;
 
-// pub mod models;
-// pub mod schema;
+pub mod models;
+pub mod schema;
 pub mod web;
 
 use diesel::prelude::*;
