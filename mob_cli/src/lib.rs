@@ -1,6 +1,7 @@
 #![deny(warnings)]
 
 extern crate clap;
+extern crate mob_server;
 extern crate rand;
 extern crate termion;
 
@@ -12,6 +13,7 @@ pub mod timer;
 pub mod tmux;
 
 use clap::ArgMatches;
+use mob_server::web;
 use std::error::Error as StdError;
 use std::process::exit;
 use team::{Member, Team};
@@ -21,6 +23,10 @@ type Result<T> = std::result::Result<T, error::Error>;
 pub fn run(matches: ArgMatches) -> Result<()> {
     match matches.subcommand() {
         ("prompt", Some(subcommand_matches)) => prompt::run(subcommand_matches),
+        ("server", Some(_matches)) => {
+            web::app().launch();
+            Ok(())
+        },
         _ => timer(&matches),
     }
 }

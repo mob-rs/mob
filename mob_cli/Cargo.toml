@@ -10,5 +10,6 @@ repository = "https://github.com/mob-rs/mob"
 
 [dependencies]
 clap = "2.23"
+mob_server = { path = "../mob_server" }
 rand = "0.3"
 termion = "1.3"

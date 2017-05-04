@@ -7,6 +7,8 @@ pub fn build_cli() -> App<'static, 'static> {
             .index(1)
             .required(true));
 
+    let server_subcommand = SubCommand::with_name("server");
+
     App::new("history")
         .version("0.1")
         .setting(AppSettings::SubcommandsNegateReqs)
@@ -20,4 +22,5 @@ pub fn build_cli() -> App<'static, 'static> {
             .long("minutes")
             .short("m"))
         .subcommand(prompt_subcommand)
+        .subcommand(server_subcommand)
 }
