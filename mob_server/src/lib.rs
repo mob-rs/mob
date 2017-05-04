@@ -1,11 +1,11 @@
-#![deny(warnings)]
+// #![deny(warnings)]
 
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_codegen;
 extern crate dotenv;
 
-pub mod models;
-pub mod schema;
+// pub mod models;
+// pub mod schema;
 
 use diesel::prelude::*;
 use diesel::sqlite::SqliteConnection;
@@ -13,17 +13,10 @@ use diesel::sqlite::SqliteConnection;
 use dotenv::dotenv;
 #[cfg(not(test))]
 use std::env;
-use std::error::Error as StdError;
-use std::process::exit;
 #[cfg(test)]
 use std::io;
 
-type Result<T> = std::result::Result<T, error::Error>;
-
-pub fn handle_error<E: StdError, T>(error: E) -> T {
-    println!("{:?}", error);
-    exit(1);
-}
+// type Result<T> = std::result::Result<T, error::Error>;
 
 #[cfg(not(test))]
 pub fn establish_connection() -> SqliteConnection {
