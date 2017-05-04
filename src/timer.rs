@@ -17,6 +17,7 @@ pub fn run(time_per_driver_in_minutes: &f64, team: &mut Team) -> Result<()> {
     let mut elapsed_time = 0.0;
 
     loop {
+        println!("{}", team.driver);
         if is_time_for_next_driver(&time_per_driver_in_seconds, elapsed_time) {
             prompt_user(team)?;
         };
