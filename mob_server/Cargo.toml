@@ -1,0 +1,6 @@
+[package]
+name = "mob_server"
+version = "0.1.0"
+authors = ["Michael Stock <mikeastock@gmail.com>"]
+
+[dependencies]

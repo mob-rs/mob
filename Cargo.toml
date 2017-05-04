@@ -1,4 +1,5 @@
 [workspace]
 members = [
     "mob_cli",
+    "mob_server",
 ]
