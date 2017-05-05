@@ -2,7 +2,6 @@ use diesel::sqlite::SqliteConnection;
 use r2d2;
 use r2d2_diesel::ConnectionManager;
 
-use std::io;
 use std::ops::Deref;
 
 use rocket::http::Status;
@@ -19,7 +18,7 @@ pub fn default_pool() -> Pool {
     let pool = r2d2::Pool::new(config, manager).expect("db pool");
 
     let connection = pool.get().unwrap();
-    embedded_migrations::run(connection.deref());
+    embedded_migrations::run(connection.deref()).unwrap();
 
     pool
 }

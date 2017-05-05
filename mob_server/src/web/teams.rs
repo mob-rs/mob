@@ -1,9 +1,15 @@
+use Result;
 use db::Conn;
 use models::{NewTeam, Team};
-use Result;
+use schema::teams::dsl::{teams as all_teams};
+use schema::teams;
+use std::ops::Deref;
 
 use rocket::Route;
 use rocket_contrib::{JSON, Value};
+
+use diesel;
+use diesel::prelude::*;
 
 pub fn routes() -> Vec<Route> {
     routes![index, create]
@@ -11,40 +17,60 @@ pub fn routes() -> Vec<Route> {
 
 #[get("/", format = "application/json")]
 fn index(conn: Conn) -> Result<JSON<Vec<Team>>> {
-    let teams = Team::all(&conn)?;
+    let teams = all_teams.load(conn.deref())?;
 
     Ok(JSON(teams))
 }
 
-#[post("/", format = "application/json", data = "<team>")]
-fn create(team: JSON<NewTeam>, conn: Conn) -> JSON<Value> {
-    println!("{:?}", team);
-    JSON(json!({ "message": "created" }))
+#[post("/", format = "application/json", data = "<new_team>")]
+fn create(new_team: JSON<NewTeam>, conn: Conn) -> Result<JSON<Value>> {
+    diesel::insert(&new_team.into_inner())
+        .into(teams::table)
+        .execute(conn.deref())?;
+
+    Ok(JSON(json!({ "message": "created" })))
 }
 
 #[cfg(test)]
 mod test {
-    use db;
+    use db::Pool;
+    use web::app;
+
+    use diesel::Connection;
+    use diesel::sqlite::SqliteConnection;
+    use r2d2;
+    use r2d2_diesel::ConnectionManager;
     use rocket::http::Method::*;
     use rocket::http::{ContentType, Status};
     use rocket::testing::MockRequest;
     use std::ops::Deref;
-    use web::app;
-    use diesel::Connection;
+
+    embed_migrations!("migrations");
+
+    fn test_pool() -> Pool {
+        let config = r2d2::Config::builder().pool_size(1).build();
+        let manager = ConnectionManager::<SqliteConnection>::new(":memory:");
+        let pool = r2d2::Pool::new(config, manager).expect("db pool");
+
+        let connection = pool.get().unwrap();
+        embedded_migrations::run(connection.deref()).unwrap();
+
+        pool
+    }
 
     #[test]
     fn test_index() {
         let app = app(None);
 
         let mut req = MockRequest::new(Get, "/teams").header(ContentType::JSON);
-        let mut response = req.dispatch_with(&app);
+        let response = req.dispatch_with(&app);
 
         assert_eq!(response.status(), Status::Ok);
     }
 
     #[test]
     fn test_create() {
-        let pool = db::default_pool();
+        let pool = test_pool();
         let connection = pool.get().unwrap();
 
         let app = app(Some(pool));

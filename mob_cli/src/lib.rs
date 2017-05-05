@@ -24,7 +24,7 @@ pub fn run(matches: ArgMatches) -> Result<()> {
     match matches.subcommand() {
         ("prompt", Some(subcommand_matches)) => prompt::run(subcommand_matches),
         ("server", Some(_matches)) => {
-            web::app().launch();
+            web::app(None).launch();
             Ok(())
         },
         _ => timer(&matches),
