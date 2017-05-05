@@ -13,7 +13,7 @@ fn index(conn: Conn) -> Result<JSON<Vec<Team>>> {
 }
 
 #[post("/", format = "application/json", data = "<team>")]
-fn create(team: JSON<NewTeam>) -> JSON<Value> {
+fn create(team: JSON<NewTeam>, conn: Conn) -> JSON<Value> {
     println!("{:?}", team);
     JSON(json!({ "message": "created" }))
 }
@@ -24,34 +24,38 @@ pub fn routes() -> Vec<Route> {
 
 #[cfg(test)]
 mod test {
+    use db;
     use rocket::http::Method::*;
     use rocket::http::{ContentType, Status};
     use rocket::testing::MockRequest;
+    use std::ops::Deref;
     use web::app;
+    use diesel::Connection;
 
     #[test]
     fn test_index() {
-        let app = app();
+        let app = app(None);
 
         let mut req = MockRequest::new(Get, "/teams").header(ContentType::JSON);
         let mut response = req.dispatch_with(&app);
 
         assert_eq!(response.status(), Status::Ok);
-
-        let body = response.body().unwrap().into_string().unwrap();
-        assert!(body.contains("Hello World!"));
     }
 
     #[test]
     fn test_create() {
-        let app = app();
+        let pool = db::default_pool();
+        let connection = pool.get().unwrap();
+
+        let app = app(Some(pool));
 
         let mut req = MockRequest::new(Post, "/teams")
             .header(ContentType::JSON)
             .body(r#"{ "driver_id": 1 }"#);
 
-        let mut response = req.dispatch_with(&app);
+        connection.begin_test_transaction().unwrap();
 
+        let mut response = req.dispatch_with(&app);
         assert_eq!(response.status(), Status::Ok);
         let body = response.body().unwrap().into_string().unwrap();
         assert!(body.contains("created"));

@@ -1,10 +1,11 @@
-use db::init_pool;
+use db::{Pool, default_pool};
 use rocket::{self, Rocket};
 
 mod teams;
 
-pub fn app() -> Rocket {
+pub fn app(pool: Option<Pool>) -> Rocket {
+    let pool = pool.unwrap_or(default_pool());
     rocket::ignite()
-        .manage(init_pool())
+        .manage(pool)
         .mount("/teams", teams::routes())
 }

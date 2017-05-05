@@ -1,5 +1,4 @@
 use diesel::sqlite::SqliteConnection;
-use diesel;
 use r2d2;
 use r2d2_diesel::ConnectionManager;
 
@@ -10,21 +9,21 @@ use rocket::http::Status;
 use rocket::request::{self, FromRequest};
 use rocket::{Request, State, Outcome};
 
+embed_migrations!("migrations");
+
 pub type Pool = r2d2::Pool<ConnectionManager<SqliteConnection>>;
 
-pub fn init_pool() -> Pool {
+pub fn default_pool() -> Pool {
     let config = r2d2::Config::default();
     let manager = ConnectionManager::<SqliteConnection>::new(database_url());
     let pool = r2d2::Pool::new(config, manager).expect("db pool");
 
     let connection = pool.get().unwrap();
-    let migrations_dir = diesel::migrations::find_migrations_directory().unwrap();
-    diesel::migrations::run_pending_migrations_in_directory(connection.deref(), &migrations_dir, &mut io::sink()).unwrap();
+    embedded_migrations::run(connection.deref());
 
     pool
 }
 
-#[cfg(not(test))]
 fn database_url() -> String {
     use std::env;
 
@@ -36,11 +35,6 @@ fn database_url() -> String {
         .unwrap()
         .to_owned()
 
-}
-
-#[cfg(test)]
-fn database_url() -> String {
-    ":memory:".into()
 }
 
 pub struct Conn(r2d2::PooledConnection<ConnectionManager<SqliteConnection>>);
