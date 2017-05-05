@@ -5,6 +5,10 @@ use Result;
 use rocket::Route;
 use rocket_contrib::{JSON, Value};
 
+pub fn routes() -> Vec<Route> {
+    routes![index, create]
+}
+
 #[get("/", format = "application/json")]
 fn index(conn: Conn) -> Result<JSON<Vec<Team>>> {
     let teams = Team::all(&conn)?;
@@ -16,10 +20,6 @@ fn index(conn: Conn) -> Result<JSON<Vec<Team>>> {
 fn create(team: JSON<NewTeam>, conn: Conn) -> JSON<Value> {
     println!("{:?}", team);
     JSON(json!({ "message": "created" }))
-}
-
-pub fn routes() -> Vec<Route> {
-    routes![index, create]
 }
 
 #[cfg(test)]
