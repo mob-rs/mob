@@ -1,4 +1,4 @@
-#![deny(warnings)]
+// #![deny(warnings)]
 #![allow(unmounted_route)]
 
 #![feature(plugin)]

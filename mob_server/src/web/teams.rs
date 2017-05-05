@@ -33,6 +33,8 @@ fn create(new_team: JSON<NewTeam>, conn: Conn) -> Result<JSON<Value>> {
 
 #[cfg(test)]
 mod test {
+    extern crate tempdir;
+
     use db::Pool;
     use web::app;
 
@@ -44,12 +46,21 @@ mod test {
     use rocket::http::{ContentType, Status};
     use rocket::testing::MockRequest;
     use std::ops::Deref;
+    use self::tempdir::TempDir;
 
     embed_migrations!("migrations");
 
     fn test_pool() -> Pool {
+        let database_url = TempDir::new("mob")
+            .unwrap()
+            .path()
+            .join("db")
+            .to_str()
+            .unwrap()
+            .to_owned();
+
         let config = r2d2::Config::builder().pool_size(1).build();
-        let manager = ConnectionManager::<SqliteConnection>::new(":memory:");
+        let manager = ConnectionManager::<SqliteConnection>::new(database_url);
         let pool = r2d2::Pool::new(config, manager).expect("db pool");
 
         let connection = pool.get().unwrap();
