@@ -33,33 +33,27 @@ fn create(new_team: JSON<NewTeam>, conn: Conn) -> Result<JSON<Value>> {
 
 #[cfg(test)]
 mod test {
-    extern crate tempdir;
+    extern crate uuid;
 
     use db::Pool;
     use web::app;
+    use models::Team;
 
-    use diesel::Connection;
+    use diesel::prelude::*;
     use diesel::sqlite::SqliteConnection;
     use r2d2;
     use r2d2_diesel::ConnectionManager;
     use rocket::http::Method::*;
     use rocket::http::{ContentType, Status};
     use rocket::testing::MockRequest;
+    use self::uuid::Uuid;
     use std::ops::Deref;
-    use self::tempdir::TempDir;
 
     embed_migrations!("migrations");
 
     fn test_pool() -> Pool {
-        let database_url = TempDir::new("mob")
-            .unwrap()
-            .path()
-            .join("db")
-            .to_str()
-            .unwrap()
-            .to_owned();
-
-        let config = r2d2::Config::builder().pool_size(1).build();
+        let config = r2d2::Config::default();
+        let database_url = format!("file:{}.db?mode=memory&cache=shared", Uuid::new_v4());
         let manager = ConnectionManager::<SqliteConnection>::new(database_url);
         let pool = r2d2::Pool::new(config, manager).expect("db pool");
 
@@ -71,7 +65,7 @@ mod test {
 
     #[test]
     fn test_index() {
-        let app = app(None);
+        let app = app(Some(test_pool()));
 
         let mut req = MockRequest::new(Get, "/teams").header(ContentType::JSON);
         let response = req.dispatch_with(&app);
@@ -81,20 +75,26 @@ mod test {
 
     #[test]
     fn test_create() {
-        let pool = test_pool();
-        let connection = pool.get().unwrap();
+        use schema::teams::dsl::*;
+        use schema::teams::table as teams;
 
-        let app = app(Some(pool));
+        let pool = test_pool();
+
+        let app = app(Some(pool.clone()));
 
         let mut req = MockRequest::new(Post, "/teams")
             .header(ContentType::JSON)
             .body(r#"{ "driver_id": 1 }"#);
 
-        connection.begin_test_transaction().unwrap();
+        let connection = pool.get().unwrap();
 
         let mut response = req.dispatch_with(&app);
+
         assert_eq!(response.status(), Status::Ok);
         let body = response.body().unwrap().into_string().unwrap();
         assert!(body.contains("created"));
+
+        let team: Team = teams.filter(driver_id.eq(1)).first(connection.deref()).unwrap();
+        assert_eq!(team.driver_id, 1);
     }
 }
