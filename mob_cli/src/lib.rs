@@ -21,7 +21,9 @@ use clap::ArgMatches;
 use mob_server::{db, web};
 use std::error::Error as StdError;
 use std::process::exit;
+use std::thread::sleep;
 use std::thread;
+use std::time::Duration;
 
 type Result<T> = std::result::Result<T, error::Error>;
 
@@ -34,6 +36,8 @@ pub fn run(matches: ArgMatches) -> Result<()> {
         },
         ("start", Some(subcommand_matches)) => {
             thread::spawn(|| web::app(db::default_pool()).launch());
+            sleep(Duration::from_millis(500));
+
             let mut team = team::create(subcommand_matches)?;
             timer::run(&mut team)
         },
