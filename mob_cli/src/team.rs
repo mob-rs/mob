@@ -91,20 +91,3 @@ impl fmt::Display for Member {
         write!(f, "{}", &self.name)
     }
 }
-
-#[cfg(test)]
-mod test {
-    use super::{Member, Team};
-
-    #[test]
-    fn test_new() {
-        let members: Vec<Member> = vec!["Mike".into(), "Brian".into(), "Patrick".into()];
-
-        let time = 5.0;
-
-        let team = Team::new(members.clone(), time);
-
-        assert_eq!(team.driver, team.members[0]);
-        assert_eq!(team.time, time);
-    }
-}
