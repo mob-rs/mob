@@ -23,21 +23,6 @@ pub fn default_pool() -> Pool {
     pool
 }
 
-#[cfg(not(test))]
-fn database_url() -> String {
-    use std::env;
-
-    let home_path = env::home_dir().expect("Home Dir to exist");
-
-    home_path
-        .join(".mob.sql")
-        .to_str()
-        .unwrap()
-        .to_owned()
-
-}
-
-#[cfg(test)]
 fn database_url() -> String {
     use uuid::Uuid;
 
