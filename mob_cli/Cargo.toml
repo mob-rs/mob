@@ -12,4 +12,8 @@ repository = "https://github.com/mob-rs/mob"
 clap = "2.23"
 mob_server = { path = "../mob_server" }
 rand = "0.3"
+reqwest = "0.5"
+serde = "0.9"
+serde_derive = "0.9"
+serde_json = "0.9"
 termion = "1.3"

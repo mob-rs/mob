@@ -1,12 +1,12 @@
 use Result;
 use db::Conn;
-use models::{NewTeam, Team};
-use schema::teams::dsl::{teams as all_teams};
-use schema::teams;
+use models::{NewMember, Member};
+use schema::members::dsl::{members as all_members};
+use schema::members;
 use std::ops::Deref;
 
 use rocket::Route;
-use rocket_contrib::{JSON, Value};
+use rocket_contrib::JSON;
 
 use diesel;
 use diesel::prelude::*;
@@ -16,19 +16,21 @@ pub fn routes() -> Vec<Route> {
 }
 
 #[get("/", format = "application/json")]
-fn index(conn: Conn) -> Result<JSON<Vec<Team>>> {
-    let teams = all_teams.load(conn.deref())?;
+fn index(conn: Conn) -> Result<JSON<Vec<Member>>> {
+    let members = all_members.load(conn.deref())?;
 
-    Ok(JSON(teams))
+    Ok(JSON(members))
 }
 
-#[post("/", format = "application/json", data = "<new_team>")]
-fn create(new_team: JSON<NewTeam>, conn: Conn) -> Result<JSON<Value>> {
-    diesel::insert(&new_team.into_inner())
-        .into(teams::table)
+#[post("/", format = "application/json", data = "<new_members>")]
+fn create(new_members: JSON<Vec<NewMember>>, conn: Conn) -> Result<JSON<Vec<Member>>> {
+    diesel::insert(&new_members.into_inner())
+        .into(members::table)
         .execute(conn.deref())?;
 
-    Ok(JSON(json!({ "message": "created" })))
+    let members = all_members.load(conn.deref())?;
+
+    Ok(JSON(members))
 }
 
 #[cfg(test)]
@@ -37,9 +39,8 @@ mod test {
 
     use db::Pool;
     use web::app;
-    use models::Team;
+    use models::Member;
 
-    use diesel::prelude::*;
     use diesel::sqlite::SqliteConnection;
     use r2d2;
     use r2d2_diesel::ConnectionManager;
@@ -47,6 +48,7 @@ mod test {
     use rocket::http::{ContentType, Status};
     use rocket::testing::MockRequest;
     use self::uuid::Uuid;
+    use serde_json;
     use std::ops::Deref;
 
     embed_migrations!("migrations");
@@ -67,7 +69,7 @@ mod test {
     fn test_index() {
         let app = app(Some(test_pool()));
 
-        let mut req = MockRequest::new(Get, "/teams").header(ContentType::JSON);
+        let mut req = MockRequest::new(Get, "/members").header(ContentType::JSON);
         let response = req.dispatch_with(&app);
 
         assert_eq!(response.status(), Status::Ok);
@@ -75,28 +77,22 @@ mod test {
 
     #[test]
     fn test_create() {
-        use schema::teams::dsl::*;
-        use schema::teams::table as teams;
-
         let pool = test_pool();
 
         let app = app(Some(pool.clone()));
 
-        let request_body = json!({ "driver_id": 1, "time": 5.0 });
+        let request_body = json!([{ "name": "Mike" }]).to_string();
 
-        let mut req = MockRequest::new(Post, "/teams")
+        let mut req = MockRequest::new(Post, "/members")
             .header(ContentType::JSON)
-            .body(request_body.to_string());
-
-        let connection = pool.get().unwrap();
+            .body(request_body);
 
         let mut response = req.dispatch_with(&app);
 
-        assert_eq!(response.status(), Status::Ok);
         let body = response.body().unwrap().into_string().unwrap();
-        assert!(body.contains("created"));
+        let members: Vec<Member> = serde_json::from_str(&body).unwrap();
 
-        let team: Team = teams.filter(driver_id.eq(1)).first(connection.deref()).unwrap();
-        assert_eq!(team.driver_id, 1);
+        assert_eq!(response.status(), Status::Ok);
+        assert_eq!(members.first().unwrap().name, "Mike")
     }
 }
