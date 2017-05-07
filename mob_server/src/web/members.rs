@@ -35,39 +35,18 @@ fn create(new_members: JSON<Vec<NewMember>>, conn: Conn) -> Result<JSON<Vec<Memb
 
 #[cfg(test)]
 mod test {
-    extern crate uuid;
-
-    use db::Pool;
+    use db::default_pool;
     use web::app;
     use models::Member;
 
-    use diesel::sqlite::SqliteConnection;
-    use r2d2;
-    use r2d2_diesel::ConnectionManager;
     use rocket::http::Method::*;
     use rocket::http::{ContentType, Status};
     use rocket::testing::MockRequest;
-    use self::uuid::Uuid;
     use serde_json;
-    use std::ops::Deref;
-
-    embed_migrations!("migrations");
-
-    fn test_pool() -> Pool {
-        let config = r2d2::Config::default();
-        let database_url = format!("file:{}.db?mode=memory&cache=shared", Uuid::new_v4());
-        let manager = ConnectionManager::<SqliteConnection>::new(database_url);
-        let pool = r2d2::Pool::new(config, manager).expect("db pool");
-
-        let connection = pool.get().unwrap();
-        embedded_migrations::run(connection.deref()).unwrap();
-
-        pool
-    }
 
     #[test]
     fn test_index() {
-        let app = app(Some(test_pool()));
+        let app = app(default_pool());
 
         let mut req = MockRequest::new(Get, "/members").header(ContentType::JSON);
         let response = req.dispatch_with(&app);
@@ -77,9 +56,9 @@ mod test {
 
     #[test]
     fn test_create() {
-        let pool = test_pool();
+        let pool = default_pool();
 
-        let app = app(Some(pool.clone()));
+        let app = app(pool.clone());
 
         let request_body = json!([{ "name": "Mike" }]).to_string();
 

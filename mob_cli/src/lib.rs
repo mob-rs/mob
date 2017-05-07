@@ -16,7 +16,7 @@ pub mod team;
 pub mod tmux;
 
 use clap::ArgMatches;
-use mob_server::web;
+use mob_server::{db, web};
 use std::error::Error as StdError;
 use std::process::exit;
 
@@ -26,7 +26,7 @@ pub fn run(matches: ArgMatches) -> Result<()> {
     match matches.subcommand() {
         ("prompt", Some(subcommand_matches)) => prompt::run(subcommand_matches),
         ("server", Some(_matches)) => {
-            web::app(None).launch();
+            web::app(db::default_pool()).launch();
             Ok(())
         },
         ("create", Some(subcommand_matches)) => team::create(subcommand_matches),

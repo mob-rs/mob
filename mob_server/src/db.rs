@@ -23,6 +23,7 @@ pub fn default_pool() -> Pool {
     pool
 }
 
+#[cfg(not(test))]
 fn database_url() -> String {
     use std::env;
 
@@ -34,6 +35,13 @@ fn database_url() -> String {
         .unwrap()
         .to_owned()
 
+}
+
+#[cfg(test)]
+fn database_url() -> String {
+    use uuid::Uuid;
+
+    format!("file:{}.db?mode=memory&cache=shared", Uuid::new_v4())
 }
 
 pub struct Conn(r2d2::PooledConnection<ConnectionManager<SqliteConnection>>);
