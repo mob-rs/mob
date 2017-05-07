@@ -1,5 +1,21 @@
+[package]
+name = "mob"
+version = "0.2.0"
+authors = ["Michael Stock <mikeastock@gmail.com>"]
+license = "MIT"
+description = "A CLI for mobbing from the comfort of your console"
+documentation = "https://github.com/mob-rs/mob"
+homepage = "https://github.com/mob-rs/mob"
+repository = "https://github.com/mob-rs/mob"
+
+[dependencies]
+clap = "2.23"
+mob_server = { path = "server" }
+rand = "0.3"
+reqwest = "0.5"
+serde = "0.9"
+serde_derive = "0.9"
+serde_json = "0.9"
+termion = "1.3"
+
 [workspace]
-members = [
-    "mob_cli",
-    "mob_server",
-]

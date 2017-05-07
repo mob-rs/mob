@@ -1,8 +1,8 @@
 #![deny(warnings)]
 
-extern crate mob_cli;
+extern crate mob;
 
-use mob_cli::*;
+use mob::*;
 
 fn main() {
     let matches = cli::build_cli().get_matches();
