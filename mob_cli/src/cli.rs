@@ -1,8 +1,8 @@
 use clap::{App, AppSettings, Arg, SubCommand};
 
 pub fn build_cli() -> App<'static, 'static> {
-    let create_subcommand = SubCommand::with_name("create")
-        .about("Setup a team for mobbing")
+    let start_subcommand = SubCommand::with_name("start")
+        .about("Start a team for mobbing")
         .arg(Arg::with_name("members")
             .help("Names for mob")
             .index(1)
@@ -28,7 +28,7 @@ pub fn build_cli() -> App<'static, 'static> {
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .after_help("You can also run `mob SUBCOMMAND -h` to get more information about that \
                      subcommand.")
-        .subcommand(create_subcommand)
+        .subcommand(start_subcommand)
         .subcommand(prompt_subcommand)
         .subcommand(server_subcommand)
 }

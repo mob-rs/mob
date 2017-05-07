@@ -11,14 +11,17 @@ extern crate serde_json;
 
 pub mod cli;
 pub mod error;
+pub mod member;
 pub mod prompt;
 pub mod team;
+pub mod timer;
 pub mod tmux;
 
 use clap::ArgMatches;
 use mob_server::{db, web};
 use std::error::Error as StdError;
 use std::process::exit;
+use std::thread;
 
 type Result<T> = std::result::Result<T, error::Error>;
 
@@ -29,7 +32,11 @@ pub fn run(matches: ArgMatches) -> Result<()> {
             web::app(db::default_pool()).launch();
             Ok(())
         },
-        ("create", Some(subcommand_matches)) => team::create(subcommand_matches),
+        ("start", Some(subcommand_matches)) => {
+            thread::spawn(|| web::app(db::default_pool()).launch());
+            let mut team = team::create(subcommand_matches)?;
+            timer::run(&mut team)
+        },
         _ => unreachable!("Should not get here"),
     }
 }

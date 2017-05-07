@@ -11,8 +11,8 @@ use tmux;
 
 const MOB_FILE_PATH: &'static str = "/tmp/mob";
 
-pub fn run(time_per_driver_in_minutes: &f64, team: &mut Team) -> Result<()> {
-    let time_per_driver_in_seconds = time_per_driver_in_minutes * 60.0;
+pub fn run(team: &mut Team) -> Result<()> {
+    let time_per_driver_in_seconds = team.time * 60.0;
 
     let mut elapsed_time = 0.0;
 

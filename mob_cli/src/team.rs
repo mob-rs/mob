@@ -1,47 +1,30 @@
 use clap::ArgMatches;
 use error::Error;
-use rand::{thread_rng, Rng};
 use reqwest::Client;
-use std::fmt;
 use super::Result;
+use member::{self, Member};
 
 const SERVER_URL: &'static str = "http://localhost:8000";
 
-pub fn create(matches: &ArgMatches) -> Result<()> {
+pub fn create(matches: &ArgMatches) -> Result<Team> {
     let time_per_driver_in_minutes = matches.value_of("minutes")
         .map(|minutes| minutes.parse::<f64>())
         .unwrap_or(Ok(5.0))?;
 
-    let new_members = matches
-        .value_of("members")
-        .expect("members")
-        .split(",")
-        .map(|name| NewMember::new(name))
-        .collect();
+    let members = member::create(matches)?;
 
-    let members = create_members(new_members)?;
+    let new_team = NewTeam::new(members, time_per_driver_in_minutes);
+    let team = persist(&new_team)?;
 
-    let team = NewTeam::new(members, time_per_driver_in_minutes);
-    create_team(&team)?;
-
-    Ok(())
+    Ok(team)
 }
 
-fn create_members(new_members: Vec<NewMember>) -> Result<Vec<Member>> {
-    let client = Client::new()?;
-
-    let url = format!("{}/members", SERVER_URL);
-    let mut response = client.post(&url).json(&new_members).send()?;
-    response.json::<Vec<Member>>().map_err(|error| Error::Http(error))
-}
-
-fn create_team(new_team: &NewTeam) -> Result<()> {
+fn persist(new_team: &NewTeam) -> Result<Team> {
     let client = Client::new()?;
 
     let url = format!("{}/teams", SERVER_URL);
-    client.post(&url).json(&new_team).send()?;
-
-    Ok(())
+    let mut response = client.post(&url).json(&new_team).send()?;
+    response.json::<Team>().map_err(|error| Error::Http(error))
 }
 
 #[derive(Debug, Serialize)]
@@ -52,11 +35,7 @@ struct NewTeam {
 
 impl NewTeam {
     fn new(members: Vec<Member>, time: f64) -> NewTeam {
-        let mut randomized_members = members.clone();
-        let mut rng = thread_rng();
-        rng.shuffle(&mut randomized_members);
-
-        let first_driver = randomized_members.first()
+        let first_driver = members.first()
             .expect("At least one member")
             .clone();
 
@@ -67,27 +46,74 @@ impl NewTeam {
     }
 }
 
-#[derive(Debug, Serialize)]
-struct NewMember {
-    name: String,
+#[derive(Debug, Deserialize)]
+pub struct Team {
+    pub id: i32,
+    pub driver: Member,
+    pub time: f64,
+    pub members: Vec<Member>,
 }
 
-impl NewMember {
-    fn new(name: &str) -> NewMember {
-        NewMember {
-            name: name.into(),
+impl Team {
+    pub fn next_driver(&self) -> Member {
+        let current_driver_index = self.members
+            .iter()
+            .position(|ref member| member == &&self.driver)
+            .expect("Valid index for current driver");
+
+        let next_driver_index = current_driver_index + 1;
+
+        if next_driver_index == self.members.len() {
+            self.members
+                .first()
+                .expect("At least one member")
+                .clone()
+        } else {
+            self.members[next_driver_index].clone()
         }
+    }
+
+    pub fn change_driver(&mut self, next_driver: &Member) {
+        self.driver = next_driver.to_owned()
     }
 }
 
-#[derive(Clone, Debug, Deserialize)]
-struct Member {
-    id: i32,
-    name: String,
-}
+#[cfg(test)]
+mod test {
+    use super::{Member, Team};
 
-impl fmt::Display for Member {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", &self.name)
+    #[test]
+    fn test_next_driver() {
+        let members: Vec<Member> = vec![
+            Member { id: 1, name: "Mike".into() },
+            Member { id: 2, name: "Brian".into() }];
+
+        let team = Team {
+            id: 1,
+            driver: members.first().unwrap().clone(),
+            time: 5.0,
+            members: members,
+        };
+
+        assert_eq!(team.next_driver(), team.members[1]);
+    }
+
+    #[test]
+    fn test_change_driver() {
+        let members: Vec<Member> = vec![
+            Member { id: 1, name: "Mike".into() },
+            Member { id: 2, name: "Brian".into() }];
+
+        let mut team = Team {
+            id: 1,
+            driver: members.first().unwrap().clone(),
+            time: 5.0,
+            members: members,
+        };
+
+        let next_driver = team.next_driver();
+        team.change_driver(&next_driver);
+
+        assert_eq!(next_driver, team.driver);
     }
 }
