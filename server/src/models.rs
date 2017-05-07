@@ -7,7 +7,7 @@ pub struct Team {
     pub time: f64,
 }
 
-#[derive(Insertable, Deserialize, Debug, PartialEq)]
+#[derive(Insertable, AsChangeset, Deserialize, Debug, PartialEq)]
 #[table_name = "teams"]
 pub struct NewTeam {
     pub driver_id: i32,
