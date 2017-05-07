@@ -10,8 +10,8 @@ pub struct Team {
 #[derive(Insertable, Deserialize, Debug, PartialEq)]
 #[table_name = "teams"]
 pub struct NewTeam {
-    driver_id: i32,
-    time: f64,
+    pub driver_id: i32,
+    pub time: f64,
 }
 
 #[derive(Queryable, Serialize, Deserialize, Debug)]

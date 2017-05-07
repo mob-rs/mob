@@ -22,7 +22,7 @@ pub fn create(matches: &ArgMatches) -> Result<Team> {
 fn persist(new_team: &NewTeam) -> Result<Team> {
     let client = Client::new()?;
 
-    let url = format!("{}/teams", SERVER_URL);
+    let url = format!("{}/team", SERVER_URL);
     let mut response = client.post(&url).json(&new_team).send()?;
     response.json::<Team>().map_err(|error| Error::Http(error))
 }
