@@ -23,5 +23,5 @@ pub struct Member {
 #[derive(Insertable, Deserialize, Debug, PartialEq)]
 #[table_name = "members"]
 pub struct NewMember {
-    name: String,
+    pub name: String,
 }

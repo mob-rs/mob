@@ -1,8 +1,9 @@
 use Result;
 use db::Conn;
-use models::{NewTeam, Team};
+use models::{NewTeam, Team, Member};
 use schema::teams::dsl::{teams as all_teams};
-use schema::teams;
+use schema::members::dsl::{members as all_members};
+use schema::{members, teams};
 use std::ops::Deref;
 
 use rocket::Route;
@@ -28,20 +29,32 @@ fn create(new_team: JSON<NewTeam>, conn: Conn) -> Result<JSON<Value>> {
         .into(teams::table)
         .execute(conn.deref())?;
 
-    Ok(JSON(json!({ "message": "created" })))
+    let team: Team = teams::table.find(1).first(conn.deref())?;
+    let driver: Member = members::table.find(team.driver_id).first(conn.deref())?;
+    let members: Vec<Member> = all_members.load(conn.deref())?;
+
+    Ok(JSON(json!({
+        "id": team.id,
+        "time": team.time,
+        "members": members,
+        "driver": driver,
+    })))
 }
 
 #[cfg(test)]
 mod test {
     use db::default_pool;
     use web::app;
-    use models::Team;
+    use models::{NewMember, Member};
+    use schema::members;
 
+    use diesel;
     use diesel::prelude::*;
     use rocket::http::Method::*;
     use rocket::http::{ContentType, Status};
     use rocket::testing::MockRequest;
     use std::ops::Deref;
+    use serde_json::{self, Value};
 
     #[test]
     fn test_index() {
@@ -55,28 +68,27 @@ mod test {
 
     #[test]
     fn test_create() {
-        use schema::teams::dsl::*;
-        use schema::teams::table as teams;
-
         let pool = default_pool();
+        let conn = pool.get().unwrap();
 
         let app = app(pool.clone());
 
-        let request_body = json!({ "driver_id": 1, "time": 5.0 });
+        let new_member = NewMember { name: "Mike".into() };
+        diesel::insert(&new_member).into(members::table).execute(conn.deref()).unwrap();
+        let driver: Member = members::table.filter(members::dsl::name.eq("Mike")).first(conn.deref()).unwrap();
+
+        let request_body = json!({ "driver_id": driver.id, "time": 5.0 });
 
         let mut req = MockRequest::new(Post, "/teams")
             .header(ContentType::JSON)
             .body(request_body.to_string());
 
-        let connection = pool.get().unwrap();
-
         let mut response = req.dispatch_with(&app);
 
-        assert_eq!(response.status(), Status::Ok);
         let body = response.body().unwrap().into_string().unwrap();
-        assert!(body.contains("created"));
+        let json: Value = serde_json::from_str(&body).unwrap();
 
-        let team: Team = teams.filter(driver_id.eq(1)).first(connection.deref()).unwrap();
-        assert_eq!(team.driver_id, 1);
+        assert_eq!(response.status(), Status::Ok);
+        assert_eq!(json["driver"]["id"], driver.id);
     }
 }
