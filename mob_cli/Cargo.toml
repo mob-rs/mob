@@ -1,6 +1,6 @@
 [package]
 name = "mob_cli"
-version = "0.1.3"
+version = "0.2.0"
 authors = ["Michael Stock <mikeastock@gmail.com>"]
 license = "MIT"
 description = "A CLI for mobbing from the comfort of your console"
