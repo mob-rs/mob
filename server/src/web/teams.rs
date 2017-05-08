@@ -12,7 +12,7 @@ use diesel;
 use diesel::prelude::*;
 
 pub fn routes() -> Vec<Route> {
-    routes![create, update, show]
+    routes![create, update_driver, delete, show]
 }
 
 #[post("/", format = "application/json", data = "<new_team>")]
@@ -24,13 +24,31 @@ fn create(new_team: JSON<NewTeam>, conn: Conn) -> Result<JSON<Value>> {
     render_team(conn)
 }
 
-#[put("/", format = "application/json", data = "<updated_team>")]
-fn update(updated_team: JSON<NewTeam>, conn: Conn) -> Result<JSON<Value>> {
-    diesel::update(teams::table.find(1))
-        .set(&updated_team.into_inner())
+#[patch("/", format = "application/json", data = "<member>")]
+fn update_driver(member: JSON<Value>, conn: Conn) -> Result<JSON<Value>> {
+    use schema::teams::dsl::*;
+    use schema::members::dsl::*;
+
+    let member_name = member
+        .get("name")
+        .and_then(|value| value.as_str())
+        .expect("Member Name");
+
+    let member: Member = members
+        .filter(name.eq(member_name))
+        .first(conn.deref())?;
+
+    diesel::update(teams.find(1))
+        .set(driver_id.eq(member.id))
         .execute(conn.deref())?;
 
     render_team(conn)
+}
+
+#[delete("/")]
+fn delete(conn: Conn) -> Result<JSON<Value>> {
+    diesel::delete(teams::table.find(1)).execute(conn.deref())?;
+    Ok(JSON(json!({ "message": "deleted" })))
 }
 
 #[get("/", format = "application/json")]
@@ -40,7 +58,9 @@ fn show(conn: Conn) -> Result<JSON<Value>> {
 
 fn render_team(conn: Conn) -> Result<JSON<Value>> {
     let team: Team = teams::table.find(1).first(conn.deref())?;
-    let driver: Member = members::table.find(team.driver_id).first(conn.deref())?;
+    let driver: Member = members::table
+        .find(team.driver_id)
+        .first(conn.deref())?;
     let members: Vec<Member> = all_members.load(conn.deref())?;
 
     Ok(JSON(json!({
@@ -92,7 +112,7 @@ mod test {
     }
 
     #[test]
-    fn test_update() {
+    fn test_update_driver() {
         let pool = default_pool();
         let app = app(pool.clone());
         let conn = pool.get().unwrap();
@@ -109,8 +129,8 @@ mod test {
         diesel::insert(&new_team).into(teams::table).execute(conn.deref()).unwrap();
         let team: Team = teams::table.find(1).first(conn.deref()).unwrap();
 
-        let request_body = json!({ "driver_id": next_driver.id, "time": team.time });
-        let mut req = MockRequest::new(Put, "/team")
+        let request_body = json!({ "name": next_driver.name });
+        let mut req = MockRequest::new(Patch, "/team")
             .header(ContentType::JSON)
             .body(request_body.to_string());
 
@@ -123,6 +143,30 @@ mod test {
         assert_eq!(json["time"], team.time);
         assert_eq!(json["driver"]["id"], next_driver.id);
         assert_eq!(json["driver"]["name"], next_driver.name);
+    }
+
+    #[test]
+    fn test_delete() {
+        let pool = default_pool();
+        let app = app(pool.clone());
+        let conn = pool.get().unwrap();
+
+        let mike = NewMember { name: "Mike".into() };
+        diesel::insert(&mike).into(members::table).execute(conn.deref()).unwrap();
+        let driver: Member = members::table.filter(members::dsl::name.eq("Mike")).first(conn.deref()).unwrap();
+
+        let new_team = NewTeam { driver_id: driver.id, time: 5.0 };
+        diesel::insert(&new_team).into(teams::table).execute(conn.deref()).unwrap();
+
+        let mut req = MockRequest::new(Delete, "/team");
+
+        let mut response = req.dispatch_with(&app);
+        let body = response.body().unwrap().into_string().unwrap();
+        let json: Value = serde_json::from_str(&body).unwrap();
+
+        assert_eq!(response.status(), Status::Ok);
+        assert_eq!(json["message"], "deleted");
+        assert_eq!(teams::table.count().first(conn.deref()), Ok(0));
     }
 
     #[test]

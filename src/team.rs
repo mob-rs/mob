@@ -19,6 +19,31 @@ pub fn create(matches: &ArgMatches) -> Result<Team> {
     Ok(team)
 }
 
+pub fn fetch() -> Result<Team> {
+    let client = Client::new()?;
+
+    let url = format!("{}/team", SERVER_URL);
+    let mut response = client.get(&url).send()?;
+    response.json::<Team>().map_err(|error| Error::Http(error))
+}
+
+pub fn update(next_driver: &str) -> Result<()> {
+    let client = Client::new()?;
+
+    let url = format!("{}/team", SERVER_URL);
+    let body = json!({"name": next_driver });
+    client.patch(&url).json(&body).send()?;
+    Ok(())
+}
+
+pub fn delete() -> Result<()> {
+    let client = Client::new()?;
+
+    let url = format!("{}/team", SERVER_URL);
+    client.delete(&url).send()?;
+    Ok(())
+}
+
 fn persist(new_team: &NewTeam) -> Result<Team> {
     let client = Client::new()?;
 
