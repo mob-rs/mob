@@ -10,6 +10,7 @@ pub fn run<W: Write, C: Client>(matches: &ArgMatches, buffer: &mut W, client: &C
     if let Some(interval_string) = matches.value_of("interval") {
         let interval = interval_string.parse::<u64>()?;
         loop {
+            write!(buffer, "{}{}", termion::clear::All, termion::cursor::Goto(1,1))?;
             print_status(buffer, client)?;
             buffer.flush()?;
             sleep(Duration::from_secs(interval));
@@ -21,8 +22,6 @@ pub fn run<W: Write, C: Client>(matches: &ArgMatches, buffer: &mut W, client: &C
 }
 
 fn print_status<W: Write, C: Client>(buffer: &mut W, client: &C) -> Result<()> {
-    write!(buffer, "{}{}", termion::clear::All, termion::cursor::Goto(1,1))?;
-
     match client.fetch_team() {
         Ok(team) => {
             write!(buffer, "Current Driver: {}", team.driver)?;
@@ -48,6 +47,6 @@ mod test {
         print_status(&mut buffer, &client).unwrap();
 
         let actual = String::from_utf8(buffer).unwrap();
-        assert_eq!(actual, "\u{1b}[2J\u{1b}[1;1HCurrent Driver: Mike");
+        assert_eq!(actual, "Current Driver: Mike");
     }
 }
