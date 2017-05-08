@@ -1,6 +1,7 @@
 # Mob
 
 [![CircleCI](https://circleci.com/gh/mob-rs/mob/tree/master.svg?style=svg)](https://circleci.com/gh/mob-rs/mob/tree/master)
+[![crates.io](http://meritbadge.herokuapp.com/mob)](https://crates.io/crates/mob)
 
 A CLI for mobbing from the comfort of your console.
 
