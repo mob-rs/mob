@@ -21,21 +21,33 @@ cargo install mob
 
 ## Usage
 
+#### Start
+
 Simple start your mob by running:
 
 ```bash
-mob <members>
+mob start <members>
 ```
 
 Where members is a comma separated list of users in the mob.
-
-#### Options
 
 You can specify the amount of time for driving:
 
 ```bash
 mob Mike,Zack,Ed --minutes 3
 ```
+
+#### Status
+
+You can query the status of the mob by running:
+
+```bash
+mob status
+#=> Current Driver: Mike
+```
+
+That command can also take an optional parameter of `--interval` which will
+cause the command to poll for a status.
 
 ## Contributing
 
