@@ -3,10 +3,16 @@ use std::io::Write;
 use super::Result;
 
 pub fn run<W: Write, C: Client>(buffer: &mut W, client: &C) -> Result<()> {
-    let team = client.fetch_team()?;
-
-    writeln!(buffer, "Current Driver: {}", team.driver)?;
-    Ok(())
+    match client.fetch_team() {
+        Ok(team) => {
+            writeln!(buffer, "Current Driver: {}", team.driver)?;
+            Ok(())
+        },
+        Err(_error) => {
+            println!("No mob");
+            Ok(())
+        }
+    }
 }
 
 #[cfg(test)]
