@@ -1,0 +1,14 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: mikeastock/rust:0.1
+    working_directory: ~/mob
+    steps:
+      - checkout
+      - run:
+          name: Build
+          command: cargo build --all
+      - run:
+          name: Run Tests
+          command: cargo tests --all

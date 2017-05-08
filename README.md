@@ -1,6 +1,6 @@
 # Mob
 
-[![Build Status](https://travis-ci.org/mob-rs/mob.svg?branch=master)](https://travis-ci.org/mob-rs/mob)
+[![CircleCI](https://circleci.com/gh/mob-rs/mob/tree/master.svg?style=svg)](https://circleci.com/gh/mob-rs/mob/tree/master)
 
 A CLI for mobbing from the comfort of your console.
 
