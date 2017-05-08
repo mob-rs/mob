@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: mikeastock/rust:0.1
+      - image: mikeastock/rust:0.2
     working_directory: ~/mob
     steps:
       - checkout
