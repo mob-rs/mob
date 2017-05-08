@@ -47,7 +47,10 @@ matrix:
     # - env: TARGET=powerpc64le-unknown-linux-gnu
     # - env: TARGET=s390x-unknown-linux-gnu DISABLE_TESTS=1
 
-before_install: set -e
+before_install:
+  - set -e
+  - sudo apt-get -qq update
+  - sudo apt-get install -y sqlite3
 
 install:
   - sh ci/install.sh
