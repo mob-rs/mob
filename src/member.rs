@@ -1,16 +1,13 @@
 use clap::ArgMatches;
-use error::Error;
+use client::Client;
 use rand::{thread_rng, Rng};
-use reqwest::Client;
 use std::fmt;
 use super::Result;
 
-const SERVER_URL: &'static str = "http://localhost:8000";
-
-pub fn create(matches: &ArgMatches) -> Result<Vec<Member>> {
+pub fn create<C: Client>(matches: &ArgMatches, client: &C) -> Result<Vec<Member>> {
     let names = extract_names(matches);
     let new_members = build(names)?;
-    let members = persist(new_members)?;
+    let members = client.create_members(new_members)?;
     Ok(members)
 }
 
@@ -32,14 +29,6 @@ fn build(names: Vec<&str>) -> Result<Vec<NewMember>> {
     rng.shuffle(&mut new_members);
 
     Ok(new_members)
-}
-
-fn persist(new_members: Vec<NewMember>) -> Result<Vec<Member>> {
-    let client = Client::new()?;
-
-    let url = format!("{}/members", SERVER_URL);
-    let mut response = client.post(&url).json(&new_members).send()?;
-    response.json::<Vec<Member>>().map_err(|error| Error::Http(error))
 }
 
 #[derive(Debug, Serialize)]

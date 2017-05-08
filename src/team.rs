@@ -1,59 +1,23 @@
 use clap::ArgMatches;
-use error::Error;
-use reqwest::Client;
-use super::Result;
+use client::Client;
 use member::{self, Member};
+use super::Result;
 
-const SERVER_URL: &'static str = "http://localhost:8000";
-
-pub fn create(matches: &ArgMatches) -> Result<Team> {
+pub fn create<C: Client>(matches: &ArgMatches, client: &C) -> Result<Team> {
     let time_per_driver_in_minutes = matches.value_of("minutes")
         .map(|minutes| minutes.parse::<f64>())
         .unwrap_or(Ok(5.0))?;
 
-    let members = member::create(matches)?;
+    let members = member::create(matches, client)?;
 
     let new_team = NewTeam::new(members, time_per_driver_in_minutes);
-    let team = persist(&new_team)?;
+    let team = client.create_team(&new_team)?;
 
     Ok(team)
 }
 
-pub fn fetch() -> Result<Team> {
-    let client = Client::new()?;
-
-    let url = format!("{}/team", SERVER_URL);
-    let mut response = client.get(&url).send()?;
-    response.json::<Team>().map_err(|error| Error::Http(error))
-}
-
-pub fn update(next_driver: &str) -> Result<()> {
-    let client = Client::new()?;
-
-    let url = format!("{}/team", SERVER_URL);
-    let body = json!({"name": next_driver });
-    client.patch(&url).json(&body).send()?;
-    Ok(())
-}
-
-pub fn delete() -> Result<()> {
-    let client = Client::new()?;
-
-    let url = format!("{}/team", SERVER_URL);
-    client.delete(&url).send()?;
-    Ok(())
-}
-
-fn persist(new_team: &NewTeam) -> Result<Team> {
-    let client = Client::new()?;
-
-    let url = format!("{}/team", SERVER_URL);
-    let mut response = client.post(&url).json(&new_team).send()?;
-    response.json::<Team>().map_err(|error| Error::Http(error))
-}
-
 #[derive(Debug, Serialize)]
-struct NewTeam {
+pub struct NewTeam {
     driver_id: i32,
     time: f64,
 }

@@ -1,24 +1,26 @@
+use client::Client;
 use member::Member;
 use std::env::current_exe;
 use std::thread::sleep;
 use std::time::Duration;
 use super::Result;
-use team::{self, Team};
+use team::Team;
 use tmux;
 
-pub fn run(team: &mut Team) -> Result<()> {
+pub fn run<C: Client>(team: &mut Team, client: &C) -> Result<()> {
     let time_per_driver_in_seconds = team.time * 60.0;
 
     let mut elapsed_time = 0.0;
 
     loop {
-        let team = team::fetch()?;
+        let team = client.fetch_team()?;
+
         println!("{}", team.driver);
 
         if is_time_for_next_driver(&time_per_driver_in_seconds, elapsed_time) {
             prompt_user(&team)?;
 
-            while current_driver()? != team.next_driver() {
+            while current_driver(client)? != team.next_driver() {
                 sleep(Duration::from_millis(500));
             }
         };
@@ -28,8 +30,8 @@ pub fn run(team: &mut Team) -> Result<()> {
     }
 }
 
-fn current_driver() -> Result<Member> {
-    match team::fetch() {
+fn current_driver<C: Client>(client: &C) -> Result<Member> {
+    match client.fetch_team() {
         Ok(team) => Ok(team.driver),
         Err(_error) => {
             println!("Thanks for mobbing!");

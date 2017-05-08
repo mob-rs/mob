@@ -10,16 +10,20 @@ extern crate serde;
 #[macro_use] extern crate serde_derive;
 
 pub mod cli;
+pub mod client;
 pub mod error;
 pub mod member;
 pub mod prompt;
+pub mod status;
 pub mod team;
 pub mod timer;
 pub mod tmux;
 
 use clap::ArgMatches;
+use client::{Client, HttpClient};
 use mob_server::{db, web};
 use std::error::Error as StdError;
+use std::io;
 use std::process::exit;
 use std::thread::sleep;
 use std::thread;
@@ -28,18 +32,21 @@ use std::time::Duration;
 type Result<T> = std::result::Result<T, error::Error>;
 
 pub fn run(matches: ArgMatches) -> Result<()> {
+    let client = HttpClient::new();
+
+    let mut stdout = io::stdout();
+
     match matches.subcommand() {
-        ("prompt", Some(subcommand_matches)) => prompt::run(subcommand_matches),
-        ("server", Some(_matches)) => {
-            web::app(db::default_pool()).launch();
-            Ok(())
+        ("prompt", Some(subcommand_matches)) => {
+            prompt::run(subcommand_matches, &client)
         },
+        ("status", Some(_matches)) => status::run(&mut stdout, &client),
         ("start", Some(subcommand_matches)) => {
             thread::spawn(|| web::app(db::default_pool()).launch());
             sleep(Duration::from_millis(500));
 
-            let mut team = team::create(subcommand_matches)?;
-            timer::run(&mut team)
+            let mut team = team::create(subcommand_matches, &client)?;
+            timer::run(&mut team, &client)
         },
         _ => unreachable!("Should not get here"),
     }

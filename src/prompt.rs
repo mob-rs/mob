@@ -1,11 +1,11 @@
 use clap::ArgMatches;
+use client::Client;
 use std::io::{self, Write};
 use std::process::exit;
 use super::Result;
-use team;
 use termion::color;
 
-pub fn run(matches: &ArgMatches) -> Result<()> {
+pub fn run<C: Client>(matches: &ArgMatches, client: &C) -> Result<()> {
     let next_driver = matches.value_of("next_driver").expect("Next Driver");
     print_next_driver(&next_driver);
     print_continue()?;
@@ -14,8 +14,8 @@ pub fn run(matches: &ArgMatches) -> Result<()> {
     io::stdin().read_line(&mut input)?;
 
     match input.trim().to_lowercase().as_ref() {
-        "y" => team::update(next_driver)?,
-        "n" => team::delete()?,
+        "y" => client.update_team(next_driver)?,
+        "n" => client.delete_team()?,
         _ => {
             println!("Invalid input");
             exit(1);

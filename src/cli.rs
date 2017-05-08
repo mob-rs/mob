@@ -19,8 +19,8 @@ pub fn build_cli() -> App<'static, 'static> {
             .index(1)
             .required(true));
 
-    let server_subcommand = SubCommand::with_name("server")
-        .about("Start server for mob");
+    let status_subcommand = SubCommand::with_name("status")
+        .about("Mob status");
 
     App::new("history")
         .version("0.1")
@@ -30,5 +30,5 @@ pub fn build_cli() -> App<'static, 'static> {
                      subcommand.")
         .subcommand(start_subcommand)
         .subcommand(prompt_subcommand)
-        .subcommand(server_subcommand)
+        .subcommand(status_subcommand)
 }
