@@ -20,7 +20,11 @@ pub fn build_cli() -> App<'static, 'static> {
             .required(true));
 
     let status_subcommand = SubCommand::with_name("status")
-        .about("Mob status");
+        .about("Mob status")
+        .arg(Arg::with_name("interval")
+             .help("Refresh interval")
+             .takes_value(true)
+             .long("interval"));
 
     App::new("history")
         .version("0.1")

@@ -2,7 +2,7 @@ use reqwest::Error as ReqwestError;
 use std::error::Error as StdError;
 use std::fmt;
 use std::io::Error as IoError;
-use std::num::ParseFloatError;
+use std::num::{ParseFloatError, ParseIntError};
 use std::string::FromUtf8Error;
 
 #[derive(Debug)]
@@ -11,6 +11,7 @@ pub enum Error {
     Http(ReqwestError),
     Io(IoError),
     ParseFloat(ParseFloatError),
+    ParseInt(ParseIntError),
 }
 
 use self::Error::*;
@@ -21,7 +22,8 @@ impl StdError for Error {
             FromUtf8(ref from_utf8_error) => from_utf8_error.description(),
             Http(ref reqwest_error) => reqwest_error.description(),
             Io(ref io_error) => io_error.description(),
-            ParseFloat(ref parse_int_error) => parse_int_error.description(),
+            ParseFloat(ref parse_float_error) => parse_float_error.description(),
+            ParseInt(ref parse_int_error) => parse_int_error.description(),
         }
     }
 }
@@ -47,6 +49,12 @@ impl From<FromUtf8Error> for Error {
 impl From<ParseFloatError> for Error {
     fn from(error: ParseFloatError) -> Error {
         ParseFloat(error)
+    }
+}
+
+impl From<ParseIntError> for Error {
+    fn from(error: ParseIntError) -> Error {
+        ParseInt(error)
     }
 }
 

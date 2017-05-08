@@ -40,7 +40,7 @@ pub fn run(matches: ArgMatches) -> Result<()> {
         ("prompt", Some(subcommand_matches)) => {
             prompt::run(subcommand_matches, &client)
         },
-        ("status", Some(_matches)) => status::run(&mut stdout, &client),
+        ("status", Some(subcommand_matches)) => status::run(subcommand_matches, &mut stdout, &client),
         ("start", Some(subcommand_matches)) => {
             thread::spawn(|| web::app(db::default_pool()).launch());
             sleep(Duration::from_millis(500));

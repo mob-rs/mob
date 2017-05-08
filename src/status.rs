@@ -1,15 +1,35 @@
+use clap::ArgMatches;
 use client::Client;
 use std::io::Write;
+use std::thread::sleep;
+use std::time::Duration;
 use super::Result;
+use termion;
 
-pub fn run<W: Write, C: Client>(buffer: &mut W, client: &C) -> Result<()> {
+pub fn run<W: Write, C: Client>(matches: &ArgMatches, buffer: &mut W, client: &C) -> Result<()> {
+    if let Some(interval_string) = matches.value_of("interval") {
+        let interval = interval_string.parse::<u64>()?;
+        loop {
+            print_status(buffer, client)?;
+            buffer.flush()?;
+            sleep(Duration::from_secs(interval));
+        }
+    };
+
+    print_status(buffer, client)?;
+    Ok(())
+}
+
+fn print_status<W: Write, C: Client>(buffer: &mut W, client: &C) -> Result<()> {
+    write!(buffer, "{}{}", termion::clear::All, termion::cursor::Goto(1,1))?;
+
     match client.fetch_team() {
         Ok(team) => {
-            writeln!(buffer, "Current Driver: {}", team.driver)?;
+            write!(buffer, "Current Driver: {}", team.driver)?;
             Ok(())
         },
         Err(_error) => {
-            println!("No mob");
+            write!(buffer, "No mob")?;
             Ok(())
         }
     }
@@ -17,17 +37,17 @@ pub fn run<W: Write, C: Client>(buffer: &mut W, client: &C) -> Result<()> {
 
 #[cfg(test)]
 mod test {
-    use super::run;
+    use super::print_status;
     use client::{Client, MockClient};
 
     #[test]
-    fn test_run() {
+    fn test_print_status() {
         let client = MockClient::new();
         let mut buffer = vec![];
 
-        run(&mut buffer, &client).unwrap();
+        print_status(&mut buffer, &client).unwrap();
 
         let actual = String::from_utf8(buffer).unwrap();
-        assert_eq!(actual, "Current Driver: Mike\n");
+        assert_eq!(actual, "\u{1b}[2J\u{1b}[1;1HCurrent Driver: Mike");
     }
 }
