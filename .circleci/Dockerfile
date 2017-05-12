@@ -6,8 +6,9 @@ RUN \
   build-essential \
   ca-certificates \
   curl \
-  libssl-dev \
+  libpq-dev \
   libsqlite3-dev \
+  libssl-dev \
   pkg-config \
   sqlite3
 
