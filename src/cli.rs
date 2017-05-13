@@ -17,6 +17,12 @@ pub fn build_cli() -> App<'static, 'static> {
         .setting(AppSettings::Hidden)
         .arg(Arg::with_name("next_driver")
             .index(1)
+            .required(true))
+        .arg(Arg::with_name("next_driver_id")
+            .index(2)
+            .required(true))
+        .arg(Arg::with_name("team_id")
+            .index(3)
             .required(true));
 
     let status_subcommand = SubCommand::with_name("status")

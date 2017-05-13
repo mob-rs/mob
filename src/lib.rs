@@ -1,10 +1,10 @@
-// #![deny(warnings)]
+#![deny(warnings)]
 
 extern crate clap;
-extern crate mob_server;
 extern crate rand;
 extern crate reqwest;
 extern crate termion;
+extern crate hostname;
 extern crate serde;
 #[macro_use] extern crate serde_json;
 #[macro_use] extern crate serde_derive;
@@ -21,13 +21,9 @@ pub mod tmux;
 
 use clap::ArgMatches;
 use client::{Client, HttpClient};
-use mob_server::{db, web};
 use std::error::Error as StdError;
 use std::io;
 use std::process::exit;
-use std::thread::sleep;
-use std::thread;
-use std::time::Duration;
 
 type Result<T> = std::result::Result<T, error::Error>;
 
@@ -42,9 +38,6 @@ pub fn run(matches: ArgMatches) -> Result<()> {
         },
         ("status", Some(subcommand_matches)) => status::run(subcommand_matches, &mut stdout, &client),
         ("start", Some(subcommand_matches)) => {
-            thread::spawn(|| web::app(db::default_pool()).launch());
-            sleep(Duration::from_millis(500));
-
             let mut team = team::create(subcommand_matches, &client)?;
             timer::run(&mut team, &client)
         },

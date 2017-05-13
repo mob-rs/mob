@@ -1,7 +1,13 @@
 use clap::ArgMatches;
 use client::Client;
+use hostname::get_hostname;
 use member::{self, Member};
 use super::Result;
+
+pub enum TeamId {
+    Id(i32),
+    Hostname(String),
+}
 
 pub fn create<C: Client>(matches: &ArgMatches, client: &C) -> Result<Team> {
     let time_per_driver_in_minutes = matches.value_of("minutes")
@@ -10,20 +16,25 @@ pub fn create<C: Client>(matches: &ArgMatches, client: &C) -> Result<Team> {
 
     let members = member::create(matches, client)?;
 
-    let new_team = NewTeam::new(members, time_per_driver_in_minutes);
+    let new_team = NewTeam::new(members, time_per_driver_in_minutes, hostname());
     let team = client.create_team(&new_team)?;
 
     Ok(team)
+}
+
+fn hostname() -> String {
+    get_hostname().expect("system to have a hostname")
 }
 
 #[derive(Debug, Serialize)]
 pub struct NewTeam {
     driver_id: i32,
     time: f64,
+    hostname: String,
 }
 
 impl NewTeam {
-    fn new(members: Vec<Member>, time: f64) -> NewTeam {
+    fn new(members: Vec<Member>, time: f64, hostname: String) -> NewTeam {
         let first_driver = members.first()
             .expect("At least one member")
             .clone();
@@ -31,6 +42,7 @@ impl NewTeam {
         NewTeam {
             driver_id: first_driver.id,
             time: time,
+            hostname: hostname,
         }
     }
 }
@@ -39,6 +51,7 @@ impl NewTeam {
 pub struct Team {
     pub id: i32,
     pub driver: Member,
+    pub hostname: String,
     pub time: f64,
     pub members: Vec<Member>,
 }
@@ -80,6 +93,7 @@ mod test {
         let team = Team {
             id: 1,
             driver: members.first().unwrap().clone(),
+            hostname: "example".into(),
             time: 5.0,
             members: members,
         };
@@ -96,6 +110,7 @@ mod test {
         let mut team = Team {
             id: 1,
             driver: members.first().unwrap().clone(),
+            hostname: "example".into(),
             time: 5.0,
             members: members,
         };

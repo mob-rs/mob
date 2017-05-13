@@ -1,4 +1,5 @@
 use reqwest::Error as ReqwestError;
+use std::env::VarError;
 use std::error::Error as StdError;
 use std::fmt;
 use std::io::Error as IoError;
@@ -7,6 +8,7 @@ use std::string::FromUtf8Error;
 
 #[derive(Debug)]
 pub enum Error {
+    Env(VarError),
     FromUtf8(FromUtf8Error),
     Http(ReqwestError),
     Io(IoError),
@@ -19,6 +21,7 @@ use self::Error::*;
 impl StdError for Error {
     fn description(&self) -> &str {
         match *self {
+            Env(ref var_error) => var_error.description(),
             FromUtf8(ref from_utf8_error) => from_utf8_error.description(),
             Http(ref reqwest_error) => reqwest_error.description(),
             Io(ref io_error) => io_error.description(),
@@ -61,5 +64,11 @@ impl From<ParseIntError> for Error {
 impl From<ReqwestError> for Error {
     fn from(error: ReqwestError) -> Error {
         Http(error)
+    }
+}
+
+impl From<VarError> for Error {
+    fn from(error: VarError) -> Error {
+        Env(error)
     }
 }
