@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 use client::Client;
 use hostname::get_hostname;
-use member::{self, Member};
+use member::{self, NewMember, Member};
 use super::Result;
 
 pub enum TeamId {
@@ -14,9 +14,9 @@ pub fn create<C: Client>(matches: &ArgMatches, client: &C) -> Result<Team> {
         .map(|minutes| minutes.parse::<f64>())
         .unwrap_or(Ok(5.0))?;
 
-    let members = member::create(matches, client)?;
+    let new_members = member::build(matches);
 
-    let new_team = NewTeam::new(members, time_per_driver_in_minutes, hostname());
+    let new_team = NewTeam::new(new_members, time_per_driver_in_minutes, hostname());
     let team = client.create_team(&new_team)?;
 
     Ok(team)
@@ -28,21 +28,17 @@ fn hostname() -> String {
 
 #[derive(Debug, Serialize)]
 pub struct NewTeam {
-    driver_id: i32,
     time: f64,
     hostname: String,
+    members: Vec<NewMember>,
 }
 
 impl NewTeam {
-    fn new(members: Vec<Member>, time: f64, hostname: String) -> NewTeam {
-        let first_driver = members.first()
-            .expect("At least one member")
-            .clone();
-
+    fn new(new_members: Vec<NewMember>, time: f64, hostname: String) -> NewTeam {
         NewTeam {
-            driver_id: first_driver.id,
             time: time,
             hostname: hostname,
+            members: new_members,
         }
     }
 }

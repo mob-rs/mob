@@ -8,6 +8,11 @@ use termion::color;
 pub fn run<C: Client>(matches: &ArgMatches, client: &C) -> Result<()> {
     let next_driver = matches.value_of("next_driver").expect("Next Driver");
 
+    let previous_driver_id = matches
+        .value_of("previous_driver_id")
+        .expect("Previous Driver ID")
+        .parse::<i32>()?;
+
     let next_driver_id = matches
         .value_of("next_driver_id")
         .expect("Next Driver ID")
@@ -25,7 +30,7 @@ pub fn run<C: Client>(matches: &ArgMatches, client: &C) -> Result<()> {
     io::stdin().read_line(&mut input)?;
 
     match input.trim().to_lowercase().as_ref() {
-        "y" => client.update_team(team_id, next_driver_id)?,
+        "y" => update_driver(client, previous_driver_id, next_driver_id)?,
         "n" => client.delete_team(team_id)?,
         _ => {
             println!("Invalid input");
@@ -46,5 +51,11 @@ fn print_next_driver(next_driver: &str) {
 fn print_continue() -> Result<()> {
     print!("Continue [y/n]? ");
     io::stdout().flush()?;
+    Ok(())
+}
+
+fn update_driver<C: Client>(client: &C, previous_driver_id: i32, next_driver_id: i32) -> Result<()> {
+    client.update_member(previous_driver_id, false)?;
+    client.update_member(next_driver_id, true)?;
     Ok(())
 }

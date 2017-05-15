@@ -18,11 +18,14 @@ pub fn build_cli() -> App<'static, 'static> {
         .arg(Arg::with_name("next_driver")
             .index(1)
             .required(true))
-        .arg(Arg::with_name("next_driver_id")
+        .arg(Arg::with_name("previous_driver_id")
             .index(2)
             .required(true))
-        .arg(Arg::with_name("team_id")
+        .arg(Arg::with_name("next_driver_id")
             .index(3)
+            .required(true))
+        .arg(Arg::with_name("team_id")
+            .index(4)
             .required(true));
 
     let status_subcommand = SubCommand::with_name("status")

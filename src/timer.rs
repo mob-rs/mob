@@ -44,7 +44,7 @@ fn prompt_user(team: &Team) -> Result<()> {
     let bin = current_exe()?.to_str().expect("Binary path").to_owned();
     let next_driver = team.next_driver();
 
-    let prompt_command = format!("{} prompt {} {} {}", bin, next_driver.name, next_driver.id, team.id);
+    let prompt_command = format!("{} prompt {} {} {} {}", bin, next_driver.name, team.driver.id, next_driver.id, team.id);
     tmux::new_window_with_command(&prompt_command)?;
 
     Ok(())

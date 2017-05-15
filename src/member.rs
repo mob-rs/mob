@@ -1,14 +1,21 @@
 use clap::ArgMatches;
-use client::Client;
 use rand::{thread_rng, Rng};
 use std::fmt;
-use super::Result;
 
-pub fn create<C: Client>(matches: &ArgMatches, client: &C) -> Result<Vec<Member>> {
-    let names = extract_names(matches);
-    let new_members = build(names)?;
-    let members = client.create_members(new_members)?;
-    Ok(members)
+pub fn build(matches: &ArgMatches) -> Vec<NewMember> {
+    let mut names = extract_names(matches);
+
+    let mut rng = thread_rng();
+    rng.shuffle(&mut names);
+
+    names
+        .into_iter()
+        .enumerate()
+        .map(|(index, name)| {
+            let position = index as i32 + 1;
+            NewMember::new(name, position)
+        })
+        .collect()
 }
 
 fn extract_names<'a>(matches: &'a ArgMatches) -> Vec<&'a str> {
@@ -19,27 +26,17 @@ fn extract_names<'a>(matches: &'a ArgMatches) -> Vec<&'a str> {
         .collect()
 }
 
-fn build(names: Vec<&str>) -> Result<Vec<NewMember>> {
-    let mut new_members: Vec<NewMember> = names
-        .into_iter()
-        .map(|name| NewMember::new(name))
-        .collect();
-
-    let mut rng = thread_rng();
-    rng.shuffle(&mut new_members);
-
-    Ok(new_members)
-}
-
 #[derive(Debug, Serialize)]
 pub struct NewMember {
     name: String,
+    position: i32,
 }
 
 impl NewMember {
-    pub fn new(name: &str) -> NewMember {
+    pub fn new(name: &str, position: i32) -> NewMember {
         NewMember {
             name: name.into(),
+            position: position,
         }
     }
 }

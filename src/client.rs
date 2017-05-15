@@ -1,5 +1,5 @@
 use error::Error;
-use member::{NewMember, Member};
+use member::Member;
 use reqwest::Client as ReqwestClient;
 use super::Result;
 use team::{NewTeam, Team, TeamId};
@@ -8,11 +8,10 @@ const SERVER_URL: &'static str = "http://localhost:8000";
 
 pub trait Client {
     fn new() -> Self;
-    fn fetch_team(&self, team_id: TeamId) -> Result<Team>;
     fn create_team(&self, new_team: &NewTeam) -> Result<Team>;
-    fn update_team(&self, id: i32, driver_id: i32) -> Result<()>;
+    fn fetch_team(&self, team_id: TeamId) -> Result<Team>;
     fn delete_team(&self, id: i32) -> Result<()>;
-    fn create_members(&self, new_members: Vec<NewMember>) -> Result<Vec<Member>>;
+    fn update_member(&self, id: i32, driver: bool) -> Result<Member>;
 }
 
 pub struct HttpClient {
@@ -44,23 +43,17 @@ impl Client for HttpClient {
         response.json::<Team>().map_err(|error| Error::Http(error))
     }
 
-    fn update_team(&self, id: i32, driver_id: i32) -> Result<()> {
-        let url = format!("{}/teams/{}", SERVER_URL, id);
-        let body = json!({ "driver_id": driver_id });
-        self.inner.patch(&url).json(&body).send()?;
-        Ok(())
-    }
-
     fn delete_team(&self, id: i32) -> Result<()> {
         let url = format!("{}/teams/{}", SERVER_URL, id);
         self.inner.delete(&url).send()?;
         Ok(())
     }
 
-    fn create_members(&self, new_members: Vec<NewMember>) -> Result<Vec<Member>> {
-        let url = format!("{}/members", SERVER_URL);
-        let mut response = self.inner.post(&url).json(&new_members).send()?;
-        response.json::<Vec<Member>>().map_err(|error| Error::Http(error))
+    fn update_member(&self, id: i32, driver: bool) -> Result<Member> {
+        let url = format!("{}/members/{}", SERVER_URL, id);
+        let body = json!({ "driver": driver });
+        let mut response = self.inner.patch(&url).json(&body).send()?;
+        response.json::<Member>().map_err(|error| Error::Http(error))
     }
 }
 
@@ -104,19 +97,11 @@ impl Client for MockClient {
         Ok(team)
     }
 
-    fn update_team(&self, _id: i32, _driver_id: i32) -> Result<()> {
-        Ok(())
-    }
-
     fn delete_team(&self, _id: i32) -> Result<()> {
         Ok(())
     }
 
-    fn create_members(&self, _new_members: Vec<NewMember>) -> Result<Vec<Member>> {
-        let mike = Member { id: 1, name: "Mike".into() };
-        let brian = Member { id: 2, name: "Brian".into() };
-        let members = vec![mike, brian];
-
-        Ok(members)
+    fn update_member(&self, _id: i32, _driver: bool) -> Result<Member> {
+        Ok(Member { id: 1, name: "Mike".into() })
     }
 }
