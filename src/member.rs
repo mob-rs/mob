@@ -45,6 +45,25 @@ impl NewMember {
 pub struct Member {
     pub id: i32,
     pub name: String,
+    pub position: i32,
+    pub active: bool,
+    pub driver: bool,
+}
+
+impl Member {
+    pub fn new(id: i32, name: &str, position: i32, active: bool, driver: bool) -> Member {
+        Member {
+            id: id,
+            name: name.into(),
+            position: position,
+            active: active,
+            driver: driver,
+        }
+    }
+
+    pub fn is_active(&self) -> bool {
+        self.active
+    }
 }
 
 impl fmt::Display for Member {

@@ -67,8 +67,8 @@ impl Client for MockClient {
     }
 
     fn fetch_team(&self, _team_id: TeamId) -> Result<Team> {
-        let mike = Member { id: 1, name: "Mike".into() };
-        let brian = Member { id: 2, name: "Brian".into() };
+        let mike = Member::new(1, "Mike", 1, true, true);
+        let brian = Member::new(2, "Brian", 2, true, false);
         let members = vec![mike.clone(), brian];
         let team = Team {
             id: 1,
@@ -82,8 +82,8 @@ impl Client for MockClient {
     }
 
     fn create_team(&self, _new_team: &NewTeam) -> Result<Team> {
-        let mike = Member { id: 1, name: "Mike".into() };
-        let brian = Member { id: 2, name: "Brian".into() };
+        let mike = Member::new(1, "Mike", 1, true, true);
+        let brian = Member::new(2, "Brian", 2, true, false);
         let members = vec![mike.clone(), brian];
 
         let team = Team {
@@ -101,7 +101,7 @@ impl Client for MockClient {
         Ok(())
     }
 
-    fn update_member(&self, _id: i32, _driver: bool) -> Result<Member> {
-        Ok(Member { id: 1, name: "Mike".into() })
+    fn update_member(&self, _id: i32, driver: bool) -> Result<Member> {
+        Ok(Member::new(1, "Mike", 1, true, driver))
     }
 }

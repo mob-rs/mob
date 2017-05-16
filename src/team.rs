@@ -54,25 +54,33 @@ pub struct Team {
 
 impl Team {
     pub fn next_driver(&self) -> Member {
-        let current_driver_index = self.members
-            .iter()
-            .position(|ref member| member == &&self.driver)
-            .expect("Valid index for current driver");
+        let next_driver_position = next_driver_position(
+            self.driver.position + 1,
+            &self.members);
 
-        let next_driver_index = current_driver_index + 1;
-
-        if next_driver_index == self.members.len() {
-            self.members
-                .first()
-                .expect("At least one member")
-                .clone()
-        } else {
-            self.members[next_driver_index].clone()
-        }
+        self.members
+            .clone()
+            .into_iter()
+            .find(|member| member.position == next_driver_position)
+            .expect("Member to exist at position")
     }
 
     pub fn change_driver(&mut self, next_driver: &Member) {
         self.driver = next_driver.to_owned()
+    }
+}
+
+fn next_driver_position(next_position: i32, members: &Vec<Member>) -> i32 {
+    match members.into_iter().find(|member| member.position == next_position) {
+        Some(driver) => {
+            if driver.is_active() {
+                driver.position
+            } else {
+                next_driver_position(driver.position + 1, members)
+            }
+        }
+        None => next_driver_position(0, members)
+
     }
 }
 
@@ -82,26 +90,52 @@ mod test {
 
     #[test]
     fn test_next_driver() {
+        let current_driver = Member::new(1, "Mike", 1, true, true);
+        let next_driver = Member::new(2, "Brian", 2, true, false);
         let members: Vec<Member> = vec![
-            Member { id: 1, name: "Mike".into() },
-            Member { id: 2, name: "Brian".into() }];
+            current_driver.clone(),
+            next_driver.clone(),
+            Member::new(3, "Patrick", 3, true, false)];
 
         let team = Team {
             id: 1,
-            driver: members.first().unwrap().clone(),
+            driver: current_driver,
             hostname: "example".into(),
             time: 5.0,
             members: members,
         };
 
-        assert_eq!(team.next_driver(), team.members[1]);
+        assert_eq!(team.next_driver(), next_driver);
+    }
+
+    #[test]
+    fn test_next_driver_ignores_inactive() {
+        let current_driver  = Member::new(1, "Mike", 1, true, true);
+        let inactive_driver  = Member::new(2, "Brian", 2, false, false);
+        let next_driver  = Member::new(3, "Patrick", 3, true, false);
+
+        let members: Vec<Member> = vec![
+            current_driver.clone(),
+            inactive_driver,
+            next_driver.clone()];
+
+        let team = Team {
+            id: 1,
+            driver: current_driver,
+            hostname: "example".into(),
+            time: 5.0,
+            members: members,
+        };
+
+        assert_eq!(team.next_driver(), next_driver);
     }
 
     #[test]
     fn test_change_driver() {
         let members: Vec<Member> = vec![
-            Member { id: 1, name: "Mike".into() },
-            Member { id: 2, name: "Brian".into() }];
+            Member::new(1, "Mike", 1, true, true),
+            Member::new(2, "Brian", 2, true, false),
+            Member::new(3, "Patrick", 3, true, false)];
 
         let mut team = Team {
             id: 1,
