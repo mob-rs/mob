@@ -64,10 +64,6 @@ impl Team {
             .find(|member| member.position == next_driver_position)
             .expect("Member to exist at position")
     }
-
-    pub fn change_driver(&mut self, next_driver: &Member) {
-        self.driver = next_driver.to_owned()
-    }
 }
 
 fn next_driver_position(next_position: i32, members: &Vec<Member>) -> i32 {
@@ -128,26 +124,5 @@ mod test {
         };
 
         assert_eq!(team.next_driver(), next_driver);
-    }
-
-    #[test]
-    fn test_change_driver() {
-        let members: Vec<Member> = vec![
-            Member::new(1, "Mike", 1, true, true),
-            Member::new(2, "Brian", 2, true, false),
-            Member::new(3, "Patrick", 3, true, false)];
-
-        let mut team = Team {
-            id: 1,
-            driver: members.first().unwrap().clone(),
-            hostname: "example".into(),
-            time: 5.0,
-            members: members,
-        };
-
-        let next_driver = team.next_driver();
-        team.change_driver(&next_driver);
-
-        assert_eq!(next_driver, team.driver);
     }
 }
