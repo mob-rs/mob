@@ -58,11 +58,13 @@ impl Team {
             self.driver.position + 1,
             &self.members);
 
-        self.members
+        let mut next_driver = self.members
             .clone()
             .into_iter()
             .find(|member| member.position == next_driver_position)
-            .expect("Member to exist at position")
+            .expect("Member to exist at position");
+        next_driver.driver = true;
+        next_driver
     }
 }
 
