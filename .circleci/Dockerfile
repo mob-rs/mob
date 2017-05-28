@@ -6,6 +6,7 @@ RUN \
   build-essential \
   ca-certificates \
   curl \
+  docker \
   libpq-dev \
   libsqlite3-dev \
   libssl-dev \
