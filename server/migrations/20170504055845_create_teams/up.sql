@@ -1,0 +1,5 @@
+CREATE TABLE teams (
+  id SERIAL PRIMARY KEY,
+  driver_id INTEGER NOT NULL,
+  time FLOAT NOT NULL
+);
