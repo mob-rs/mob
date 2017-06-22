@@ -26,7 +26,9 @@ pub fn default_pool() -> Pool {
 pub fn database_url() -> String {
     dotenv().ok();
 
-    env::var("DATABASE_URL").expect("DATABASE_URL must be set")
+    let default_url = "postgres://localhost/mob".into();
+
+    env::var("DATABASE_URL").unwrap_or(default_url)
 }
 
 pub struct Conn(r2d2::PooledConnection<ConnectionManager<PgConnection>>);

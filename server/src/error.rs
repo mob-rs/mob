@@ -1,4 +1,5 @@
 use diesel::result::Error as DieselError;
+use rocket::Request;
 use rocket::http::{ContentType, Status};
 use rocket::response::{Responder, Response};
 use std::error::Error as StdError;
@@ -30,7 +31,7 @@ impl fmt::Display for Error {
 }
 
 impl<'r> Responder<'r> for Error {
-    fn respond(self) -> Result<Response<'r>, Status> {
+    fn respond_to(self, _: &Request) -> Result<Response<'r>, Status> {
         match self {
             Diesel(ref diesel_error) => handle_diesel_error(diesel_error),
             ParseInt(ref _parse_int_error) => respond_with_500(),
