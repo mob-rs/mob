@@ -8,6 +8,10 @@ documentation = "https://github.com/mob-rs/mob"
 homepage = "https://github.com/mob-rs/mob"
 repository = "https://github.com/mob-rs/mob"
 
+[[bin]]
+name = "main"
+doc = false
+
 [dependencies]
 clap = "2.23"
 hostname = "0.1"
