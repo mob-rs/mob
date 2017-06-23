@@ -7,7 +7,6 @@ description = "A CLI for mobbing from the comfort of your console"
 documentation = "https://github.com/mob-rs/mob"
 homepage = "https://github.com/mob-rs/mob"
 repository = "https://github.com/mob-rs/mob"
-build = "build.rs"
 
 [[bin]]
 name = "main"
