@@ -13,7 +13,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: warehouse-v1-{{ checksum "Cargo.lock" }}
+          key: mob-v1-{{ checksum "Cargo.lock" }}
       - run:
           name: Install Diesel CLI
           command: |
