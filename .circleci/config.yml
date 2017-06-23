@@ -11,4 +11,4 @@ jobs:
           command: cargo build --all
       - run:
           name: Run Tests
-          command: cargo test --all
+          command: RUST_TEST_THREADS=1 cargo test --all
