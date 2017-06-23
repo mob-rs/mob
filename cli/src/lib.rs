@@ -4,7 +4,6 @@ extern crate clap;
 extern crate rand;
 extern crate reqwest;
 extern crate termion;
-extern crate hostname;
 extern crate serde;
 #[macro_use] extern crate serde_json;
 #[macro_use] extern crate serde_derive;

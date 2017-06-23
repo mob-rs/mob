@@ -1,13 +1,7 @@
 use clap::ArgMatches;
 use client::Client;
-use hostname::get_hostname;
 use member::{self, NewMember, Member};
 use super::Result;
-
-pub enum TeamId {
-    Id(i32),
-    Hostname(String),
-}
 
 pub fn create<C: Client>(matches: &ArgMatches, client: &C) -> Result<Team> {
     let time_per_driver_in_minutes = matches.value_of("minutes")
@@ -16,28 +10,22 @@ pub fn create<C: Client>(matches: &ArgMatches, client: &C) -> Result<Team> {
 
     let new_members = member::build(matches);
 
-    let new_team = NewTeam::new(new_members, time_per_driver_in_minutes, hostname());
+    let new_team = NewTeam::new(new_members, time_per_driver_in_minutes);
     let team = client.create_team(&new_team)?;
 
     Ok(team)
 }
 
-fn hostname() -> String {
-    get_hostname().expect("system to have a hostname")
-}
-
 #[derive(Debug, Serialize)]
 pub struct NewTeam {
     time: f64,
-    hostname: String,
     members: Vec<NewMember>,
 }
 
 impl NewTeam {
-    fn new(new_members: Vec<NewMember>, time: f64, hostname: String) -> NewTeam {
+    fn new(new_members: Vec<NewMember>, time: f64) -> NewTeam {
         NewTeam {
             time: time,
-            hostname: hostname,
             members: new_members,
         }
     }
@@ -47,7 +35,6 @@ impl NewTeam {
 pub struct Team {
     pub id: i32,
     pub driver: Member,
-    pub hostname: String,
     pub time: f64,
     pub members: Vec<Member>,
 }
@@ -89,7 +76,7 @@ mod test {
     #[test]
     fn test_next_driver() {
         let current_driver = Member::new(1, "Mike", 1, true, true);
-        let next_driver = Member::new(2, "Brian", 2, true, false);
+        let next_driver = Member::new(2, "Brian", 2, true, true);
         let members: Vec<Member> = vec![
             current_driver.clone(),
             next_driver.clone(),
@@ -98,7 +85,6 @@ mod test {
         let team = Team {
             id: 1,
             driver: current_driver,
-            hostname: "example".into(),
             time: 5.0,
             members: members,
         };
@@ -110,7 +96,7 @@ mod test {
     fn test_next_driver_ignores_inactive() {
         let current_driver  = Member::new(1, "Mike", 1, true, true);
         let inactive_driver  = Member::new(2, "Brian", 2, false, false);
-        let next_driver  = Member::new(3, "Patrick", 3, true, false);
+        let next_driver  = Member::new(3, "Patrick", 3, true, true);
 
         let members: Vec<Member> = vec![
             current_driver.clone(),
@@ -120,7 +106,6 @@ mod test {
         let team = Team {
             id: 1,
             driver: current_driver,
-            hostname: "example".into(),
             time: 5.0,
             members: members,
         };

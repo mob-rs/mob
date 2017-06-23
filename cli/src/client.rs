@@ -2,14 +2,14 @@ use error::Error;
 use member::Member;
 use reqwest::Client as ReqwestClient;
 use super::Result;
-use team::{NewTeam, Team, TeamId};
+use team::{NewTeam, Team};
 
 const SERVER_URL: &'static str = "http://localhost:8000";
 
 pub trait Client {
     fn new() -> Self;
     fn create_team(&self, new_team: &NewTeam) -> Result<Team>;
-    fn fetch_team(&self, team_id: TeamId) -> Result<Team>;
+    fn fetch_team(&self, id: i32) -> Result<Team>;
     fn delete_team(&self, id: i32) -> Result<()>;
     fn update_member(&self, id: i32, driver: bool) -> Result<Member>;
 }
@@ -27,12 +27,8 @@ impl Client for HttpClient {
         }
     }
 
-    fn fetch_team(&self, team_id: TeamId) -> Result<Team> {
-        let url = match team_id {
-            TeamId::Id(id) => format!("{}/teams/{}", SERVER_URL, id),
-            TeamId::Hostname(hostname) => format!("{}/teams/hostname/{}", SERVER_URL, hostname),
-        };
-
+    fn fetch_team(&self, id: i32) -> Result<Team> {
+        let url = format!("{}/teams/{}", SERVER_URL, id);
         let mut response = self.inner.get(&url).send()?;
         response.json::<Team>().map_err(|error| Error::Http(error))
     }
@@ -66,14 +62,13 @@ impl Client for MockClient {
         MockClient {}
     }
 
-    fn fetch_team(&self, _team_id: TeamId) -> Result<Team> {
+    fn fetch_team(&self, _id: i32) -> Result<Team> {
         let mike = Member::new(1, "Mike", 1, true, true);
         let brian = Member::new(2, "Brian", 2, true, false);
         let members = vec![mike.clone(), brian];
         let team = Team {
             id: 1,
             driver: mike,
-            hostname: "example".into(),
             time: 5.0,
             members: members,
         };
@@ -89,7 +84,6 @@ impl Client for MockClient {
         let team = Team {
             id: 1,
             driver: mike,
-            hostname: "example".into(),
             time: 5.0,
             members: members,
         };

@@ -4,7 +4,7 @@ use std::env::current_exe;
 use std::thread::sleep;
 use std::time::Duration;
 use super::Result;
-use team::{Team, TeamId};
+use team::Team;
 use tmux;
 
 pub fn run<C: Client>(team: &mut Team, client: &C) -> Result<()> {
@@ -13,7 +13,7 @@ pub fn run<C: Client>(team: &mut Team, client: &C) -> Result<()> {
     let mut elapsed_time = 0.0;
 
     loop {
-        let team = client.fetch_team(TeamId::Id(team.id))?;
+        let team = client.fetch_team(team.id)?;
 
         println!("{}", team.driver);
 
@@ -31,7 +31,7 @@ pub fn run<C: Client>(team: &mut Team, client: &C) -> Result<()> {
 }
 
 fn current_driver<C: Client>(client: &C, team_id: i32) -> Result<Member> {
-    match client.fetch_team(TeamId::Id(team_id)) {
+    match client.fetch_team(team_id) {
         Ok(team) => Ok(team.driver),
         Err(_error) => {
             println!("Thanks for mobbing!");

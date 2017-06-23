@@ -1,11 +1,9 @@
 use clap::ArgMatches;
 use client::Client;
-use hostname::get_hostname;
 use std::io::Write;
 use std::thread::sleep;
 use std::time::Duration;
 use super::Result;
-use team::TeamId;
 use termion;
 
 pub fn run<W: Write, C: Client>(matches: &ArgMatches, buffer: &mut W, client: &C) -> Result<()> {
@@ -24,7 +22,7 @@ pub fn run<W: Write, C: Client>(matches: &ArgMatches, buffer: &mut W, client: &C
 }
 
 fn print_status<W: Write, C: Client>(buffer: &mut W, client: &C) -> Result<()> {
-    match client.fetch_team(TeamId::Hostname(hostname())) {
+    match client.fetch_team(1) {
         Ok(team) => {
             write!(buffer, "Current Driver: {}", team.driver)?;
             Ok(())
@@ -34,10 +32,6 @@ fn print_status<W: Write, C: Client>(buffer: &mut W, client: &C) -> Result<()> {
             Ok(())
         }
     }
-}
-
-fn hostname() -> String {
-    get_hostname().expect("system to have a hostname")
 }
 
 #[cfg(test)]
