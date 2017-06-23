@@ -4,10 +4,9 @@ jobs:
     docker:
       - image: mikeastock/rust:nightly
         environment:
-          - DATABASE_URL=postgres://localhost/mob_test
+          - DATABASE_URL=postgres://postgres@localhost/mob_test
       - image: circleci/postgres:9.6
         environment:
-          - POSTGRES_USER=root
           - POSTGRES_DB=mob_test
     working_directory: /mob
     steps:
