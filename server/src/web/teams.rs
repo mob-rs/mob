@@ -11,19 +11,18 @@ use diesel;
 use diesel::prelude::*;
 
 pub fn routes() -> Vec<Route> {
-    routes![create, show, show_by_hostname, delete]
+    routes![create, show, delete]
 }
 
 #[derive(Debug, Deserialize)]
 struct NewTeamBody {
     time: f64,
-    hostname: String,
     members: Vec<NewMemberBody>,
 }
 
 impl NewTeamBody {
     fn new_team(&self) -> NewTeam {
-        NewTeam::new(self.time, &self.hostname)
+        NewTeam::new(self.time)
     }
 
     fn new_members(self, team: &Team) -> Vec<NewMember> {
@@ -64,15 +63,6 @@ fn show(id: i32, conn: Conn) -> Result<JSON<Value>> {
     render_team(team, conn)
 }
 
-#[get("/hostname/<hostname>", format = "application/json")]
-fn show_by_hostname(hostname: String, conn: Conn) -> Result<JSON<Value>> {
-    let team: Team = teams::table
-        .filter(teams::hostname.eq(hostname))
-        .first(conn.deref())?;
-
-    render_team(team, conn)
-}
-
 #[delete("/<id>")]
 fn delete(id: i32, conn: Conn) -> Result<JSON<Value>> {
     diesel::delete(teams::table.find(id)).execute(conn.deref())?;
@@ -89,7 +79,6 @@ fn render_team(team: Team, conn: Conn) -> Result<JSON<Value>> {
     Ok(JSON(json!({
         "id": team.id,
         "time": team.time,
-        "hostname": team.hostname,
         "members": members,
         "driver": driver,
     })))
@@ -106,17 +95,14 @@ mod test {
 
     use diesel::prelude::*;
     use diesel;
-    use rocket::http::Method::*;
     use rocket::http::{ContentType, Status};
-    use rocket::testing::MockRequest;
-    use self::uuid::Uuid;
+    use rocket::local::Client;
     use serde_json::{self, Value};
     use std::ops::Deref;
 
     fn assert_team_response(team: Team, driver: Member, json: Value) {
         assert_eq!(json["id"], team.id, "json has team id");
         assert_eq!(json["time"], team.time, "json has team time");
-        assert_eq!(json["hostname"], team.hostname, "json has team hostname");
         assert_eq!(json["driver"]["id"], driver.id, "json has driver id");
         assert_eq!(json["driver"]["name"], driver.name, "json has driver name");
     }
@@ -127,7 +113,6 @@ mod test {
 
         let request_body = json!({
             "time": 5.0,
-            "hostname": "example",
             "members": [
                 { "name": "Mike", "position": 1 },
                 { "name": "Brian", "position": 2 },
@@ -135,11 +120,14 @@ mod test {
             ],
         });
 
-        let mut req = MockRequest::new(Post, "/teams")
-            .header(ContentType::JSON)
-            .body(request_body.to_string());
+        let client = Client::new(app).unwrap();
 
-        let mut response = req.dispatch_with(&app);
+        let mut response = client
+            .post("/teams")
+            .header(ContentType::JSON)
+            .body(request_body.to_string())
+            .dispatch();
+
         let body = response.body().unwrap().into_string().unwrap();
         let json: Value = serde_json::from_str(&body).unwrap();
 
@@ -153,7 +141,7 @@ mod test {
         let app = app(pool.clone());
         let conn = pool.get().unwrap();
 
-        let new_team = NewTeam::new(5.0, "example");
+        let new_team = NewTeam::new(5.0);
         let team = diesel::insert(&new_team)
             .into(teams::table)
             .get_result::<Team>(conn.deref())
@@ -165,9 +153,12 @@ mod test {
             .get_result::<Member>(conn.deref())
             .unwrap();
 
-        let mut req = MockRequest::new(Get, format!("/teams/{}", team.id))
-            .header(ContentType::JSON);
-        let mut response = req.dispatch_with(&app);
+        let client = Client::new(app).unwrap();
+        let mut response = client
+            .get(format!("/teams/{}", team.id))
+            .header(ContentType::JSON)
+            .dispatch();
+
         let body = response.body().unwrap().into_string().unwrap();
         let json: Value = serde_json::from_str(&body).unwrap();
 
@@ -175,50 +166,24 @@ mod test {
         assert_team_response(team, member, json);
     }
 
-     #[test]
-     fn test_show_by_hostname() {
-         let pool = default_pool();
-         let app = app(pool.clone());
-         let conn = pool.get().unwrap();
-
-         let hostname = Uuid::new_v4().simple().to_string();
-         let new_team = NewTeam::new(5.0, &hostname);
-         let team = diesel::insert(&new_team)
-             .into(teams::table)
-             .get_result::<Team>(conn.deref())
-             .unwrap();
-
-        let new_member = NewMember::new(&team, "Mike", 1, true);
-        let member = diesel::insert(&new_member)
-            .into(members::table)
-            .get_result::<Member>(conn.deref())
-            .unwrap();
-
-         let mut req = MockRequest::new(Get, format!("/teams/hostname/{}", team.hostname))
-             .header(ContentType::JSON);
-         let mut response = req.dispatch_with(&app);
-         let body = response.body().unwrap().into_string().unwrap();
-         let json: Value = serde_json::from_str(&body).unwrap();
-
-         assert_eq!(response.status(), Status::Ok);
-         assert_team_response(team, member, json);
-     }
-
     #[test]
     fn test_delete() {
         let pool = default_pool();
         let app = app(pool.clone());
         let conn = pool.get().unwrap();
 
-        let new_team = NewTeam::new(5.0, "example");
+        let new_team = NewTeam::new(5.0);
         let team = diesel::insert(&new_team)
             .into(teams::table)
             .get_result::<Team>(conn.deref())
             .unwrap();
 
-        let mut req = MockRequest::new(Delete, format!("/teams/{}", team.id));
+        let client = Client::new(app).unwrap();
 
-        let mut response = req.dispatch_with(&app);
+        let mut response = client
+            .delete(format!("/teams/{}", team.id))
+            .dispatch();
+
         let body = response.body().unwrap().into_string().unwrap();
         let json: Value = serde_json::from_str(&body).unwrap();
 

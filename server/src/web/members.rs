@@ -37,11 +37,10 @@ mod test {
     use schema::{members, teams};
     use web::app;
 
-    use diesel;
     use diesel::prelude::*;
-    use rocket::http::Method::*;
+    use diesel;
     use rocket::http::{ContentType, Status};
-    use rocket::testing::MockRequest;
+    use rocket::local::Client;
     use serde_json;
     use std::ops::Deref;
 
@@ -49,8 +48,11 @@ mod test {
     fn test_index() {
         let app = app(default_pool());
 
-        let mut req = MockRequest::new(Get, "/members").header(ContentType::JSON);
-        let response = req.dispatch_with(&app);
+        let client = Client::new(app).unwrap();
+        let response = client
+            .get("/members")
+            .header(ContentType::JSON)
+            .dispatch();
 
         assert_eq!(response.status(), Status::Ok);
     }
@@ -61,7 +63,7 @@ mod test {
         let app = app(pool.clone());
         let conn = pool.get().unwrap();
 
-        let new_team = NewTeam::new(5.0, "example");
+        let new_team = NewTeam::new(5.0);
         let team = diesel::insert(&new_team)
             .into(teams::table)
             .get_result::<Team>(conn.deref())
@@ -74,11 +76,14 @@ mod test {
             .unwrap();
 
         let request_body = json!({ "driver": false });
-        let mut req = MockRequest::new(Patch, format!("/members/{}", member.id))
-            .header(ContentType::JSON)
-            .body(request_body.to_string());
 
-        let mut response = req.dispatch_with(&app);
+        let client = Client::new(app).unwrap();
+        let mut response = client
+            .patch(format!("/members/{}", member.id))
+            .header(ContentType::JSON)
+            .body(request_body.to_string())
+            .dispatch();
+
         let body = response.body().unwrap().into_string().unwrap();
         let member_response: Member = serde_json::from_str(&body).unwrap();
 

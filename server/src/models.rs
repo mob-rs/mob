@@ -5,21 +5,18 @@ use schema::*;
 pub struct Team {
     pub id: i32,
     pub time: f64,
-    pub hostname: String,
 }
 
 #[derive(Insertable, Deserialize, Debug, PartialEq)]
 #[table_name = "teams"]
 pub struct NewTeam {
     pub time: f64,
-    pub hostname: String,
 }
 
 impl NewTeam {
-    pub fn new(time: f64, hostname: &str) -> NewTeam {
+    pub fn new(time: f64) -> NewTeam {
         NewTeam {
             time: time,
-            hostname: hostname.into(),
         }
     }
 }
