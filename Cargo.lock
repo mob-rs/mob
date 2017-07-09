@@ -5,6 +5,7 @@ dependencies = [
  "diesel 0.12.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "diesel_codegen 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "dotenv 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "error-chain 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "r2d2 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "r2d2-diesel 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket 0.3.0-dev (git+https://github.com/SergioBenitez/Rocket)",

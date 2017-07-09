@@ -7,6 +7,7 @@
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_codegen;
 extern crate dotenv;
+#[macro_use] extern crate error_chain;
 extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate rocket;
@@ -15,10 +16,8 @@ extern crate serde;
 extern crate serde_json;
 #[macro_use] extern crate serde_derive;
 
-mod error;
+mod errors;
 pub mod db;
 pub mod models;
 pub mod schema;
 pub mod web;
-
-type Result<T> = std::result::Result<T, error::Error>;

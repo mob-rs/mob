@@ -1,5 +1,5 @@
-use Result;
 use db::Conn;
+use errors::Result;
 use models::{Member, MemberChangeset};
 use schema::members;
 use std::ops::Deref;

@@ -1,5 +1,5 @@
-use Result;
 use db::Conn;
+use errors::Result;
 use models::{NewTeam, Team, NewMember, Member};
 use schema::{members, teams};
 use std::ops::Deref;

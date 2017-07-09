@@ -2,78 +2,52 @@ use diesel::result::Error as DieselError;
 use rocket::Request;
 use rocket::http::{ContentType, Status};
 use rocket::response::{Responder, Response};
-use std::error::Error as StdError;
-use std::fmt;
 use std::io::Cursor;
 use std::num::ParseIntError;
+use std::result::Result as StdResult;
 
-#[derive(Debug)]
-pub enum Error {
-    Diesel(DieselError),
-    ParseInt(ParseIntError),
-}
-
-use self::Error::*;
-
-impl StdError for Error {
-    fn description(&self) -> &str {
-        match *self {
-            Diesel(ref diesel_error) => diesel_error.description(),
-            ParseInt(ref parse_int_error) => parse_int_error.description(),
-        }
+error_chain! {
+    foreign_links {
+        Diesel(DieselError);
+        ParseInt(ParseIntError);
     }
 }
 
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        self.description().fmt(f)
-    }
-}
+use self::ErrorKind::*;
 
 impl<'r> Responder<'r> for Error {
-    fn respond_to(self, _: &Request) -> Result<Response<'r>, Status> {
-        match self {
+    fn respond_to(self, _: &Request) -> StdResult<Response<'r>, Status> {
+        match *self.kind() {
             Diesel(ref diesel_error) => handle_diesel_error(diesel_error),
             ParseInt(ref _parse_int_error) => respond_with_500(),
+            _ => respond_with_500(),
         }
     }
 }
 
-fn handle_diesel_error<'r>(diesel_error: &DieselError) -> Result<Response<'r>, Status> {
+fn handle_diesel_error<'r>(diesel_error: &DieselError) -> StdResult<Response<'r>, Status> {
     match *diesel_error {
         DieselError::NotFound => respond_with_404(),
         _ => respond_with_500(),
     }
 }
 
-fn respond_with_500<'r>() -> Result<Response<'r>, Status> {
+fn respond_with_500<'r>() -> StdResult<Response<'r>, Status> {
     let body = json!({ "message": "Internal Server Error" }).to_string();
     build_response(body, Status::InternalServerError)
 }
 
-fn respond_with_404<'r>() -> Result<Response<'r>, Status> {
+fn respond_with_404<'r>() -> StdResult<Response<'r>, Status> {
     let body = json!({ "message": "Not Found" }).to_string();
     build_response(body, Status::NotFound)
 }
 
-fn build_response<'r>(body: String, status: Status) -> Result<Response<'r>, Status> {
+fn build_response<'r>(body: String, status: Status) -> StdResult<Response<'r>, Status> {
     Response::build()
         .status(status)
         .header(ContentType::JSON)
         .sized_body(Cursor::new(body))
         .ok()
-}
-
-impl From<DieselError> for Error {
-    fn from(error: DieselError) -> Error {
-        Diesel(error)
-    }
-}
-
-impl From<ParseIntError> for Error {
-    fn from(error: ParseIntError) -> Error {
-        ParseInt(error)
-    }
 }
 
 #[cfg(test)]
