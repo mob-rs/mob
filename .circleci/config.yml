@@ -21,7 +21,7 @@ jobs:
             fi
       - run:
           name: Setup Database
-          command: diesel setup
+          command: cd server && diesel setup
       - run:
           name: Build
           command: cargo build --all
