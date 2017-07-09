@@ -35,7 +35,7 @@ Where members is a comma separated list of users in the mob.
 You can specify the amount of time for driving:
 
 ```bash
-mob Mike,Zack,Ed --minutes 3
+mob start Mike,Zack,Ed --minutes 3
 ```
 
 #### Status
