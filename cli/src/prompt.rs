@@ -1,5 +1,6 @@
 use clap::ArgMatches;
 use client::Client;
+use regex::Regex;
 use std::io::{self, Write};
 use std::process::exit;
 use super::Result;
@@ -29,13 +30,10 @@ pub fn run<C: Client>(matches: &ArgMatches, client: &C) -> Result<()> {
     let mut input = String::new();
     io::stdin().read_line(&mut input)?;
 
-    match input.trim().to_lowercase().as_ref() {
-        "y" => update_driver(client, previous_driver_id, next_driver_id)?,
-        "n" => client.delete_team(team_id)?,
-        _ => {
-            println!("Invalid input");
-            exit(1);
-        }
+    if Regex::new("y")?.is_match(&input) {
+        update_driver(client, previous_driver_id, next_driver_id)?;
+    } else {
+        client.delete_team(team_id)?;
     }
 
     exit(0);

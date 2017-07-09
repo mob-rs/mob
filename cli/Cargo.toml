@@ -14,10 +14,11 @@ doc = false
 
 [dependencies]
 clap = "2.23"
+mob_server = { path = "../server" }
 rand = "0.3"
+regex = "0.2"
 reqwest = "0.5"
 serde = "0.9"
 serde_derive = "0.9"
 serde_json = "0.9"
-mob_server = { path = "../server" }
 termion = "1.3"

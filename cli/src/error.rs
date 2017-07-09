@@ -1,3 +1,4 @@
+use regex::Error as RegexError;
 use reqwest::Error as ReqwestError;
 use std::env::VarError;
 use std::error::Error as StdError;
@@ -14,6 +15,7 @@ pub enum Error {
     Io(IoError),
     ParseFloat(ParseFloatError),
     ParseInt(ParseIntError),
+    Regex(RegexError),
 }
 
 use self::Error::*;
@@ -27,6 +29,7 @@ impl StdError for Error {
             Io(ref io_error) => io_error.description(),
             ParseFloat(ref parse_float_error) => parse_float_error.description(),
             ParseInt(ref parse_int_error) => parse_int_error.description(),
+            Regex(ref regex_error) => regex_error.description(),
         }
     }
 }
@@ -70,5 +73,11 @@ impl From<ReqwestError> for Error {
 impl From<VarError> for Error {
     fn from(error: VarError) -> Error {
         Env(error)
+    }
+}
+
+impl From<RegexError> for Error {
+    fn from(error: RegexError) -> Error {
+        Regex(error)
     }
 }
