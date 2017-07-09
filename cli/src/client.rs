@@ -1,7 +1,6 @@
-use error::Error;
+use errors::Result;
 use member::Member;
 use reqwest::Client as ReqwestClient;
-use super::Result;
 use team::{NewTeam, Team};
 
 const SERVER_URL: &'static str = "http://localhost:8000";
@@ -31,19 +30,19 @@ impl Client for HttpClient {
     fn fetch_team(&self, id: i32) -> Result<Team> {
         let url = format!("{}/teams/{}", SERVER_URL, id);
         let mut response = self.inner.get(&url).send()?;
-        response.json::<Team>().map_err(|error| Error::Http(error))
+        response.json::<Team>().map_err(|error| error.into())
     }
 
     fn fetch_last_team(&self) -> Result<Team> {
         let url = format!("{}/teams/last", SERVER_URL);
         let mut response = self.inner.get(&url).send()?;
-        response.json::<Team>().map_err(|error| Error::Http(error))
+        response.json::<Team>().map_err(|error| error.into())
     }
 
     fn create_team(&self, new_team: &NewTeam) -> Result<Team> {
         let url = format!("{}/teams", SERVER_URL);
         let mut response = self.inner.post(&url).json(&new_team).send()?;
-        response.json::<Team>().map_err(|error| Error::Http(error))
+        response.json::<Team>().map_err(|error| error.into())
     }
 
     fn delete_team(&self, id: i32) -> Result<()> {
@@ -56,7 +55,7 @@ impl Client for HttpClient {
         let url = format!("{}/members/{}", SERVER_URL, id);
         let body = json!({ "driver": driver });
         let mut response = self.inner.patch(&url).json(&body).send()?;
-        response.json::<Member>().map_err(|error| Error::Http(error))
+        response.json::<Member>().map_err(|error| error.into())
     }
 }
 
