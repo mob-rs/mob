@@ -64,7 +64,7 @@ fn next_driver_position(next_position: i32, members: &Vec<Member>) -> i32 {
                 next_driver_position(driver.position + 1, members)
             }
         }
-        None => next_driver_position(0, members)
+        None => next_driver_position(1, members)
 
     }
 }
