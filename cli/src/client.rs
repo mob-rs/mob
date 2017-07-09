@@ -10,6 +10,7 @@ pub trait Client {
     fn new() -> Self;
     fn create_team(&self, new_team: &NewTeam) -> Result<Team>;
     fn fetch_team(&self, id: i32) -> Result<Team>;
+    fn fetch_last_team(&self) -> Result<Team>;
     fn delete_team(&self, id: i32) -> Result<()>;
     fn update_member(&self, id: i32, driver: bool) -> Result<Member>;
 }
@@ -29,6 +30,12 @@ impl Client for HttpClient {
 
     fn fetch_team(&self, id: i32) -> Result<Team> {
         let url = format!("{}/teams/{}", SERVER_URL, id);
+        let mut response = self.inner.get(&url).send()?;
+        response.json::<Team>().map_err(|error| Error::Http(error))
+    }
+
+    fn fetch_last_team(&self) -> Result<Team> {
+        let url = format!("{}/teams/last", SERVER_URL);
         let mut response = self.inner.get(&url).send()?;
         response.json::<Team>().map_err(|error| Error::Http(error))
     }
@@ -63,6 +70,20 @@ impl Client for MockClient {
     }
 
     fn fetch_team(&self, _id: i32) -> Result<Team> {
+        let mike = Member::new(1, "Mike", 1, true, true);
+        let brian = Member::new(2, "Brian", 2, true, false);
+        let members = vec![mike.clone(), brian];
+        let team = Team {
+            id: 1,
+            driver: mike,
+            time: 5.0,
+            members: members,
+        };
+
+        Ok(team)
+    }
+
+    fn fetch_last_team(&self) -> Result<Team> {
         let mike = Member::new(1, "Mike", 1, true, true);
         let brian = Member::new(2, "Brian", 2, true, false);
         let members = vec![mike.clone(), brian];

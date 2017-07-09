@@ -22,7 +22,7 @@ pub fn run<W: Write, C: Client>(matches: &ArgMatches, buffer: &mut W, client: &C
 }
 
 fn print_status<W: Write, C: Client>(buffer: &mut W, client: &C) -> Result<()> {
-    match client.fetch_team(1) {
+    match client.fetch_last_team() {
         Ok(team) => {
             write!(buffer, "Current Driver: {}", team.driver)?;
             Ok(())

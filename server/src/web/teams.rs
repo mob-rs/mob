@@ -11,7 +11,7 @@ use diesel;
 use diesel::prelude::*;
 
 pub fn routes() -> Vec<Route> {
-    routes![create, show, delete]
+    routes![create, show, show_last, delete]
 }
 
 #[derive(Debug, Deserialize)]
@@ -60,6 +60,12 @@ fn create(new_team_body: JSON<NewTeamBody>, conn: Conn) -> Result<JSON<Value>> {
 #[get("/<id>", format = "application/json")]
 fn show(id: i32, conn: Conn) -> Result<JSON<Value>> {
     let team: Team = teams::table.find(id).first(conn.deref())?;
+    render_team(team, conn)
+}
+
+#[get("/last", format = "application/json")]
+fn show_last(conn: Conn) -> Result<JSON<Value>> {
+    let team: Team = teams::table.order(teams::dsl::id.desc()).first(conn.deref())?;
     render_team(team, conn)
 }
 
@@ -133,6 +139,37 @@ mod test {
 
         assert_eq!(response.status(), Status::Ok);
         assert_eq!(json["driver"]["name"], "Mike");
+    }
+
+    #[test]
+    fn test_show_last() {
+        let pool = default_pool();
+        let app = app(pool.clone());
+        let conn = pool.get().unwrap();
+
+        let new_team = NewTeam::new(5.0);
+        let team = diesel::insert(&new_team)
+            .into(teams::table)
+            .get_result::<Team>(conn.deref())
+            .unwrap();
+
+        let new_member = NewMember::new(&team, "Mike", 1, true);
+        let member = diesel::insert(&new_member)
+            .into(members::table)
+            .get_result::<Member>(conn.deref())
+            .unwrap();
+
+        let client = Client::new(app).unwrap();
+        let mut response = client
+            .get("/teams/last")
+            .header(ContentType::JSON)
+            .dispatch();
+
+        let body = response.body().unwrap().into_string().unwrap();
+        let json: Value = serde_json::from_str(&body).unwrap();
+
+        assert_eq!(response.status(), Status::Ok);
+        assert_team_response(team, member, json);
     }
 
     #[test]
