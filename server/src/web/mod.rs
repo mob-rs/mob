@@ -1,6 +1,6 @@
 use db::Pool;
 use rocket::{self, Rocket, Request};
-use rocket_contrib::{JSON, Value};
+use rocket_contrib::{Json, Value};
 use std::env;
 
 mod teams;
@@ -16,13 +16,13 @@ pub fn app(pool: Pool) -> Rocket {
 }
 
 #[error(404)]
-fn not_found(_req: &Request) -> JSON<Value> {
-    JSON(json!({ "message": "Not Found" }))
+fn not_found(_req: &Request) -> Json<Value> {
+    Json(json!({ "message": "Not Found" }))
 }
 
 #[error(500)]
-fn server_error(_req: &Request) -> JSON<Value> {
-    JSON(json!({ "message": "Internal Server Error" }))
+fn server_error(_req: &Request) -> Json<Value> {
+    Json(json!({ "message": "Internal Server Error" }))
 }
 
 fn set_log_level() {

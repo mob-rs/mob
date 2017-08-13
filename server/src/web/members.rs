@@ -5,7 +5,7 @@ use schema::members;
 use std::ops::Deref;
 
 use rocket::Route;
-use rocket_contrib::JSON;
+use rocket_contrib::Json;
 
 use diesel;
 use diesel::prelude::*;
@@ -15,19 +15,19 @@ pub fn routes() -> Vec<Route> {
 }
 
 #[get("/", format = "application/json")]
-fn index(conn: Conn) -> Result<JSON<Vec<Member>>> {
+fn index(conn: Conn) -> Result<Json<Vec<Member>>> {
     let members = members::dsl::members.load(conn.deref())?;
 
-    Ok(JSON(members))
+    Ok(Json(members))
 }
 
 #[patch("/<id>", format = "application/json", data = "<member_changeset>")]
-fn update(id: i32, member_changeset: JSON<MemberChangeset>, conn: Conn) -> Result<JSON<Member>> {
+fn update(id: i32, member_changeset: Json<MemberChangeset>, conn: Conn) -> Result<Json<Member>> {
     let member: Member = diesel::update(members::table.find(id))
         .set(&member_changeset.into_inner())
         .get_result::<Member>(conn.deref())?;
 
-    Ok(JSON(member))
+    Ok(Json(member))
 }
 
 #[cfg(test)]

@@ -11,6 +11,7 @@ repository = "https://github.com/mob-rs/mob"
 [[bin]]
 name = "main"
 doc = false
+path = "src/main.rs"
 
 [dependencies]
 clap = "2.23"

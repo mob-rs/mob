@@ -5,7 +5,7 @@ use schema::{members, teams};
 use std::ops::Deref;
 
 use rocket::Route;
-use rocket_contrib::{JSON, Value};
+use rocket_contrib::{Json, Value};
 
 use diesel;
 use diesel::prelude::*;
@@ -43,7 +43,7 @@ struct NewMemberBody {
 }
 
 #[post("/", format = "application/json", data = "<new_team_body>")]
-fn create(new_team_body: JSON<NewTeamBody>, conn: Conn) -> Result<JSON<Value>> {
+fn create(new_team_body: Json<NewTeamBody>, conn: Conn) -> Result<Json<Value>> {
     let body = new_team_body.into_inner();
 
     let team = diesel::insert(&body.new_team())
@@ -58,31 +58,31 @@ fn create(new_team_body: JSON<NewTeamBody>, conn: Conn) -> Result<JSON<Value>> {
 }
 
 #[get("/<id>", format = "application/json")]
-fn show(id: i32, conn: Conn) -> Result<JSON<Value>> {
+fn show(id: i32, conn: Conn) -> Result<Json<Value>> {
     let team: Team = teams::table.find(id).first(conn.deref())?;
     render_team(team, conn)
 }
 
 #[get("/last", format = "application/json")]
-fn show_last(conn: Conn) -> Result<JSON<Value>> {
+fn show_last(conn: Conn) -> Result<Json<Value>> {
     let team: Team = teams::table.order(teams::dsl::id.desc()).first(conn.deref())?;
     render_team(team, conn)
 }
 
 #[delete("/<id>")]
-fn delete(id: i32, conn: Conn) -> Result<JSON<Value>> {
+fn delete(id: i32, conn: Conn) -> Result<Json<Value>> {
     diesel::delete(teams::table.find(id)).execute(conn.deref())?;
-    Ok(JSON(json!({ "message": "deleted" })))
+    Ok(Json(json!({ "message": "deleted" })))
 }
 
-fn render_team(team: Team, conn: Conn) -> Result<JSON<Value>> {
+fn render_team(team: Team, conn: Conn) -> Result<Json<Value>> {
     let driver: Member = Member::belonging_to(&team)
         .filter(members::driver.eq(true))
         .first(conn.deref())?;
 
     let members: Vec<Member> = Member::belonging_to(&team).load(conn.deref())?;
 
-    Ok(JSON(json!({
+    Ok(Json(json!({
         "id": team.id,
         "time": team.time,
         "members": members,
