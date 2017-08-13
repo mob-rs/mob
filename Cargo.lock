@@ -457,7 +457,7 @@ name = "mob"
 version = "0.3.1"
 dependencies = [
  "clap 2.26.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "error-chain 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "error-chain 0.11.0-rc.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "mob_server 0.3.1",
  "rand 0.3.16 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
