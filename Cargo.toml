@@ -1,2 +1,5 @@
 [workspace]
-members = ["cli/", "server/"]
+members = ["cli", "server"]
+
+[replace]
+"mob_server:0.4.0" = { path = "server" }
