@@ -1,6 +1,6 @@
 [package]
 name = "mob"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Michael Stock <mikeastock@gmail.com>"]
 license = "MIT"
 description = "A CLI for mobbing from the comfort of your console"
@@ -16,7 +16,7 @@ path = "src/main.rs"
 [dependencies]
 clap = "2.23"
 error-chain = "0.11.0-rc.2"
-mob_server = "0.4.0"
+mob_server = "0.4.1"
 rand = "0.3"
 regex = "0.2"
 reqwest = "0.5"

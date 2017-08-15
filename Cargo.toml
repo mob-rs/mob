@@ -2,4 +2,4 @@
 members = ["cli", "server"]
 
 [replace]
-"mob_server:0.4.0" = { path = "server" }
+"mob_server:0.4.1" = { path = "server" }
