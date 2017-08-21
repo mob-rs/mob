@@ -35,8 +35,8 @@ pub fn build_cli() -> App<'static, 'static> {
              .takes_value(true)
              .long("interval"));
 
-    App::new("history")
-        .version("0.1")
+    App::new("mob")
+        .version(crate_version!())
         .setting(AppSettings::VersionlessSubcommands)
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .after_help("You can also run `mob SUBCOMMAND -h` to get more information about that \

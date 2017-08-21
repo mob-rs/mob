@@ -1,6 +1,6 @@
 #![deny(warnings)]
 
-extern crate clap;
+#[macro_use] extern crate clap;
 #[macro_use] extern crate error_chain;
 extern crate mob_server;
 extern crate rand;
