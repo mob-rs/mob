@@ -1,5 +1,4 @@
 #![deny(warnings)]
-#![allow(unmounted_route)]
 
 #![feature(plugin)]
 #![plugin(rocket_codegen)]

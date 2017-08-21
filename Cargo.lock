@@ -1,6 +1,6 @@
 [root]
 name = "mob_server"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "diesel 0.12.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "diesel_codegen 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -454,11 +454,11 @@ dependencies = [
 
 [[package]]
 name = "mob"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "clap 2.26.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "error-chain 0.11.0-rc.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "mob_server 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "mob_server 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.3.16 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "reqwest 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -470,9 +470,22 @@ dependencies = [
 
 [[package]]
 name = "mob_server"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-replace = "mob_server 0.4.1"
+dependencies = [
+ "diesel 0.12.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "diesel_codegen 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "dotenv 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "error-chain 0.11.0-rc.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "r2d2 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "r2d2-diesel 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rocket 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rocket_codegen 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rocket_contrib 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.11 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_derive 1.0.11 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_json 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "native-tls"
@@ -1168,7 +1181,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum memchr 0.1.11 (registry+https://github.com/rust-lang/crates.io-index)" = "d8b629fb514376c675b98c1421e80b151d3817ac42d7c667717d282761418d20"
 "checksum memchr 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "1dbccc0e46f1ea47b9f17e6d67c5a96bd27030519c519c9c91327e31275a47b4"
 "checksum mime 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)" = "ba626b8a6de5da682e1caa06bdb42a335aee5a84db8e5046a3e8ab17ba0a3ae0"
-"checksum mob_server 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "59ab93c83d207d3d2ab816250e25ee37f0add4e234bb620823012c8bc80a9af3"
+"checksum mob_server 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "b25b88ac6a7ce4736b7c9dc8b1be015d825b360c27104950e47d58eeae50aefb"
 "checksum native-tls 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)" = "04b781c9134a954c84f0594b9ab3f5606abc516030388e8511887ef4c204a1e5"
 "checksum num-traits 0.1.40 (registry+https://github.com/rust-lang/crates.io-index)" = "99843c856d68d8b4313b03a17e33c4bb42ae8f6610ea81b28abe076ac721b9b0"
 "checksum num_cpus 1.6.2 (registry+https://github.com/rust-lang/crates.io-index)" = "aec53c34f2d0247c5ca5d32cca1478762f301740468ee9ee6dcb7a0dd7a0c584"
