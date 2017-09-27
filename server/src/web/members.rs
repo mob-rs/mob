@@ -32,6 +32,8 @@ fn update(id: i32, member_changeset: Json<MemberChangeset>, conn: Conn) -> Resul
 
 #[cfg(test)]
 mod test {
+    extern crate serde_json;
+
     use db::default_pool;
     use models::{NewTeam, Team, NewMember, Member};
     use schema::{members, teams};
@@ -41,7 +43,6 @@ mod test {
     use diesel;
     use rocket::http::{ContentType, Status};
     use rocket::local::Client;
-    use serde_json;
     use std::ops::Deref;
 
     #[test]

@@ -92,7 +92,7 @@ fn render_team(team: Team, conn: Conn) -> Result<Json<Value>> {
 
 #[cfg(test)]
 mod test {
-    extern crate uuid;
+    extern crate serde_json;
 
     use db::default_pool;
     use web::app;
@@ -103,7 +103,7 @@ mod test {
     use diesel;
     use rocket::http::{ContentType, Status};
     use rocket::local::Client;
-    use serde_json::{self, Value};
+    use self::serde_json::Value;
     use std::ops::Deref;
 
     fn assert_team_response(team: Team, driver: Member, json: Value) {

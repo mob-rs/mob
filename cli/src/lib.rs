@@ -6,7 +6,6 @@ extern crate mob_server;
 extern crate rand;
 extern crate regex;
 extern crate reqwest;
-extern crate serde;
 #[macro_use] extern crate serde_json;
 #[macro_use] extern crate serde_derive;
 extern crate termion;
