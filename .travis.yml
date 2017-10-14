@@ -1,0 +1,107 @@
+# Based on the "trust" template v0.1.1
+# https://github.com/japaric/trust/tree/v0.1.1
+
+dist: trusty
+language: rust
+services:
+  - docker
+  - postgresql
+addons:
+  postgresql: "9.6"
+sudo: required
+
+env:
+  global:
+    - CRATE_NAME=mob
+
+matrix:
+  # TODO These are all the build jobs. Adjust as necessary. Comment out what you
+  # don't need
+  include:
+    # Linux
+    - env: TARGET=i686-unknown-linux-gnu
+      rust: nightly
+    - env: TARGET=i686-unknown-linux-musl
+      rust: nightly
+    - env: TARGET=x86_64-unknown-linux-gnu
+      rust: nightly
+    - env: TARGET=x86_64-unknown-linux-musl
+      rust: nightly
+
+    # OSX
+    # - env: TARGET=i686-apple-darwin
+    #   os: osx
+    - env: TARGET=x86_64-apple-darwin
+      rust: nightly
+      os: osx
+
+    # *BSD
+    - env: TARGET=i686-unknown-freebsd DISABLE_TESTS=1
+      rust: nightly
+    - env: TARGET=x86_64-unknown-freebsd DISABLE_TESTS=1
+      rust: nightly
+    - env: TARGET=x86_64-unknown-netbsd DISABLE_TESTS=1
+      rust: nightly
+
+    # Other architectures
+    # - env: TARGET=aarch64-unknown-linux-gnu
+    # - env: TARGET=armv7-unknown-linux-gnueabihf
+    # - env: TARGET=mips-unknown-linux-gnu
+    # - env: TARGET=mips64-unknown-linux-gnuabi64
+    # - env: TARGET=mips64el-unknown-linux-gnuabi64
+    # - env: TARGET=mipsel-unknown-linux-gnu
+    # - env: TARGET=powerpc-unknown-linux-gnu
+    # - env: TARGET=powerpc64-unknown-linux-gnu
+    # - env: TARGET=powerpc64le-unknown-linux-gnu
+    # - env: TARGET=s390x-unknown-linux-gnu DISABLE_TESTS=1
+
+    # Testing other channels
+    # - env: TARGET=x86_64-unknown-linux-gnu
+    #   rust: nightly
+    # - env: TARGET=x86_64-apple-darwin
+    #   os: osx
+    #   rust: nightly
+
+before_install:
+  - set -e
+  - rustup self update
+
+install:
+  - sh ci/install.sh
+  - source ~/.cargo/env || true
+  - cargo install diesel_cli --no-default-features --features postgres
+
+script:
+  - bash ci/script.sh
+
+after_script: set +e
+
+before_deploy:
+  - sh ci/before_deploy.sh
+  - cd server && diesel setup
+
+deploy:
+  api_key:
+    secure: "oLn6FN+f++/MSt/yNnJZg+BcFGidS9ZRb7dujJgY5fMKeOA9yrsm8Nvi0vtAeGieDuyGCITXINUVNTQvpYXjTY+YLY/YhRSu2ZAxT2Z2KQC28rDEqC3bhC8nNSkz7HKvxV3Ks84YVFwmkVs3YmJPjUMfCizrk/ee7+Z02g615xjCZ5LHwVItCs+PrBHOUgZmGm/ISpn1IwQQGbRPL4r+4gD15u9qP6JOiuUE3NsUwuHeBAsjX6Kf2vOCabXgh+vzCZpNJ1APsp5qIzwPFyeXzmXBgl5R5KHo1Q8gEtGmzOzhQYK0TFAiqomwizYsi/5b1nM+GfOzl9IHFMeX/AfOoxPBkqSqtMRT9E3umBdhBQRPuwKOqt9ZxsVkXm+LGvY92JPbXvxUV/7BxUxd1+9pXCtYtKuhl++9hPUlNJN/LENEuPoSpFnf36NDR+CdpH8XUHQQ/NVW/fe/kIqSKE7KWas1PhYT6NiZn1bpzfL9e2CeCbPIJxiTWmcn4Hfj0MiZlvy+2m0AkwSHBQe164/8Xx8PBzY4dYTksIP/X4ok4mumbwrp1jqrtXqWX08JU7OTI0K2QE4xZbtn7K2lZjuT0qZXH1cv3QZRrK7+sstviJPXXjDgWBrpmrILHku3gLVHgmgfyTduJFpCNW7BwV5lZrGpJaJi7PIVzKkvUU4aJ0c="
+  file_glob: true
+  file: $CRATE_NAME-$TRAVIS_TAG-$TARGET.*
+  on:
+    condition: $TRAVIS_RUST_VERSION = nightly
+    tags: true
+  provider: releases
+  skip_cleanup: true
+
+cache: cargo
+before_cache:
+  # Travis can't cache files that are not readable by "others"
+  - chmod -R a+r $HOME/.cargo
+
+branches:
+  only:
+    # release tags
+    - /^v\d+\.\d+\.\d+.*$/
+    - master
+
+notifications:
+  email:
+    on_success: never
