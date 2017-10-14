@@ -14,12 +14,6 @@ jobs:
       - restore_cache:
           key: mob-v1-{{ arch }}-{{ checksum "Cargo.lock" }}
       - run:
-          name: Install Diesel CLI
-          command: |
-            if ! type diesel > /dev/null; then
-              cargo install diesel_cli --no-default-features --features postgres
-            fi
-      - run:
           name: Setup Database
           command: cd server && diesel setup
       - run:

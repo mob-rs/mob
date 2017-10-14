@@ -16,3 +16,5 @@ RUN \
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly
 
 ENV PATH=/root/.cargo/bin:$PATH
+
+RUN cargo install diesel_cli --no-default-features --features postgres
