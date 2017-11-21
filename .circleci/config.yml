@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: mikeastock/rust:nightly
+      - image: mikeastock/rust:nightly-2017-11-20
         environment:
           - DATABASE_URL=postgres://postgres@localhost/mob_test
       - image: circleci/postgres:9.6
