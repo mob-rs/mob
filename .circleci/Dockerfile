@@ -8,10 +8,14 @@ RUN \
   curl \
   docker \
   libpq-dev \
-  libsqlite3-dev \
   libssl-dev \
   pkg-config \
-  sqlite3
+  wget
+
+ENV DOCKERIZE_VERSION v0.3.0
+RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
+  tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
+  rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly
 
