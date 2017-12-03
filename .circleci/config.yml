@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: mikeastock/rust:nightly-2017-11-20
+      - image: mikeastock/rust:nightly-2017-12-02
         environment:
           - DATABASE_URL=postgres://postgres@localhost/mob_test
       - image: circleci/postgres:9.6
@@ -15,7 +15,9 @@ jobs:
           key: mob-v1-{{ arch }}-{{ checksum "Cargo.lock" }}
       - run:
           name: Setup Database
-          command: cd server && diesel setup
+          command: |
+            dockerize -wait tcp://localhost:5432 -timeout 1m
+            cd server && diesel setup
       - run:
           name: Build
           command: cargo build --all
